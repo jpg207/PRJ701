@@ -9,11 +9,7 @@
         private function connectDb($pStrDatabase)
         {
             error_reporting( 0 );
-            $this->connectRs = mysqli_connect("localhost","compcreator","");
-            //Local host transfer if required
-            if(!$this->connectRs){
-                $this->connectRs = mysqli_connect("localhost","root","");
-            }
+            $this->connectRs = mysqli_connect("localhost","root","");
             error_reporting( E_ALL );
             if(!$this->connectRs)
             {
