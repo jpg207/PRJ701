@@ -4,8 +4,8 @@ urls = ["https://pricespy.co.nz/","https://google.co.nz/"]
 
 i=0
 
-while i< len(urls):
-    htmlfile = urllib.urlopen(urls[i])
+for url in urls:
+    htmlfile = urllib.urlopen(url)
     htmltext = htmlfile.read()
     print htmltext
     print "++++++++++++++++++++++++++++++++++++++"

@@ -20,6 +20,10 @@ label {
     color: #34495e;
 }
 
+textarea {
+  width: 100%;
+}
+
 .pure-img-responsive {
     max-width: 100%;
     height: auto;
@@ -151,9 +155,19 @@ a.pure-button-primary {
     opacity: 0.8;
 }
 
-.content-wrapper {
+.home-content-wrapper {
     position: absolute;
     top: 87%;
+    width: 100%;
+    min-height: 12%;
+    z-index: 2;
+    background: white;
+
+}
+
+.content-wrapper {
+    position: absolute;
+    top: 5%;
     width: 100%;
     min-height: 12%;
     z-index: 2;

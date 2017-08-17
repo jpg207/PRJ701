@@ -6,9 +6,9 @@
 
 <div class="splash-container">
     <div class="splash">
-        <h1 class="splash-head">Comp Creator</h1>
+        <h1 class="splash-head">Design I.T.</h1>
         <p class="splash-subhead">
-            Lets build you a custom Desktop and teach you in the process
+            Lets build you a custom Desktop and learn somthing new in the process
         </p>
         <p>
             <a href="" class="pure-button pure-button-primary">Lets get building</a>
@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<div class="content-wrapper">
+<div class="home-content-wrapper">
     <div class="content">
         <h2 class="content-head is-center">Find out more</h2>
 
@@ -27,7 +27,7 @@
                     Quickly compile a build using the latest components
                 </h3>
                 <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                    With over 2000 items in our database, we can taylor a system to meet your needs.
                 </p>
             </div>
             <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
@@ -35,7 +35,7 @@
                   Scale builds based on your own usage
                 </h3>
                 <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                    Answer some usage questions to get a more personalized build, regardless of your usage.
                 </p>
             </div>
             <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
@@ -43,7 +43,7 @@
                     Find places to buy components
                 </h3>
                 <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                    Once you have your build, find places to buy the parts from reputable companies.
                 </p>
             </div>
             <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
@@ -51,7 +51,7 @@
                     Learn about your builds components
                 </h3>
                 <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                    Learn why we picked your components vs the compentition and then how to assemble your build.
                 </p>
             </div>
         </div>

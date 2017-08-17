@@ -1,9 +1,7 @@
-#from threading import Thread
 import linecache
 import sys
 import urllib
 import re
-# mport urlparse
 from bs4 import BeautifulSoup
 import MySQLdb
 
@@ -23,7 +21,7 @@ def PrintException():
     line = linecache.getline(filename, lineno, f.f_globals)
     print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
 
-def PrintResutls(itemsstorage):
+def PrintResults(itemsstorage):
     for item in itemsstorage:
         print  item
         for itemdet in itemsstorage[item]:
@@ -31,114 +29,84 @@ def PrintResutls(itemsstorage):
         print "\n ++++++++++++++++++++++++ \n"
 
 def ScraperMainTask(urls, id):
-    stored = []
-    nevervisit = []
-    visited = []
-    itemsstorage = {}
-
+    stored = [] #Array of products to scrape
+    nevervisit = [] #Array of invalid URLs
+    visited = [] #Array of visited links
+    itemsstorage = {} #Dictionary of scraped products
+    #Regular expretion statements
     mainregex = r'^https://pricespy\.co\.nz\/product\.php\?p=[0-9]{1,}$'
     subregex = r"\?(p)="
     cutregex = r"(List [\w]* \([\d]* [\w]*, from .*\))"
-    #cutregex2 = r'(Suggest change - Beta)'
-    #cutregex3 = r'(-&gt;)'
-
     #.*?[\W]{2,}.*?|
     #(.*?[\W]{2,}.*?\)?|.*?)[\W]{2,}([\w].*)
-
     detailregex = r'(.*?)[\W]{2,}([\w].*)'
     pageregex = r'^https://pricespy\.co\.nz\/category\.php\?[a-zA-Z]=[A-Za-z0-9]{1,}&s=[0-9]{1,}$'
 
-
     count = 0
-    while urls:
-        #try:
-            htmltext = urllib.urlopen(urls[0]).read()
-            soup = BeautifulSoup(htmltext, "lxml")
+    while urls: #Cycles through each URL passed in
+        try:
+            htmltext = urllib.urlopen(urls[0]).read()#Reads the URL and saves its text
+            soup = BeautifulSoup(htmltext, "lxml")# Sets up BeautifulSoup
             count += 1
-            urls.pop(0)
-            #print len(urls)
-
-            for tag in soup.find_all('a', href=True):
-                # print tag['href']
-                link = base + tag['href']
-                category = page + tag['href']
-                # print link
-                # print matches
+            urls.pop(0)#Removes current url from list of URLs pased in
+            for tag in soup.find_all('a', href=True):#Finds any link in on the current page with a active link
+                link = base + tag['href']#Merges the base URL with the one from the link
+                category = page + tag['href']#Merges category URL with one from link
                 if link not in visited and re.search(mainregex, link, re.IGNORECASE | re.VERBOSE):
+                    #If the link is not in the visted array and matches the regular exprestion for being a product link
+                    #and then addes the link to the appropriate arrays
                     visited.append(link)
                     link = re.sub(subregex, "?e=", link)
                     stored.append(link)
-                    # urls.append(link)
-                    #print "Match"
-                    # print soup.title
-                    # print link
                 elif link not in visited and re.search(pageregex, category, re.IGNORECASE | re.VERBOSE):
+                    #If the link is not in the visted array and matches the regular exprestion for being a category link
+                    #and then addes the link to the appropriate arrays
                     visited.append(link)
                     urls.append(category)
-                    #print category
                 elif link not in stored:
+                    #Link must be invalid
                     nevervisit.append(link)
-        #except Exception, e:
-            #print "ERROR set 1 " + str(e)
-
-    # print "Initial pass"
+        except Exception, e:
+            print "ERROR set 1 " + str(e)
     count = 0
-    for link in stored:
-        itemsdetails = {}
+    for link in stored: #Loop through each product link in stored
+        itemsdetails = {} #Sets itemsdetails to nothing
         try:
-            #print "Current link: " + link
-            # print item
-            htmltext = urllib.urlopen(link).read()
-            # print htmltext
+            htmltext = urllib.urlopen(link).read() #Read url
             soup = BeautifulSoup(htmltext, "lxml")
-            # print soup
             count += 1
-            producttitle = soup.find("h1", class_="intro_header").get_text()
-            producttitle = producttitle.strip()
-            productcost = soup.find("span", class_="price").get_text()
-            productcost = productcost.lstrip('$')
-            products = soup.find_all("tr", class_="erow")
-            for product in products:
-                #print product.get_text()
-                product = product.get_text()
-                #product = re.sub(cutregex2, "", product.get_text())
+            producttitle = soup.find("h1", class_="intro_header").get_text() #Get product title
+            producttitle = producttitle.strip() #Strip off white space
+            productcost = soup.find("span", class_="price").get_text() #Get product price
+            productcost = productcost.lstrip('$') #Strip price of $
+            products = soup.find_all("tr", class_="erow") #Get all product details
+            for product in products: #Loop through all product details
+                product = product.get_text() #Get detail text
+                #Remove unwanted information from text
                 product = product.replace("Suggest change - Beta","")
                 product = re.sub(cutregex , "", product)
-                #print product
                 product = product.replace("->", "-")
-                #print product
                 product = product.strip()
-                #product = product.split("u'")
-                #product = product[len(product)-1]
-                #product = re.sub(cutregex3 "-", product.get_text())
-                #print product
-                #print product
-                product = re.search(detailregex, product)
-                #print product
+                product = re.search(detailregex, product) #Split product detail and detail title
                 if product:
-                    #print product
                     productdetail = product.group(1).replace(" ", "")
-                    #print productdetail
                     productdetailvalue = product.group(2).strip()
-                    #print productdetailvalue + "\n"
-                    if productdetailvalue == "Contribute":
+                    if productdetailvalue == "Contribute": #Null detail if only value is Contribute
                         productdetailvalue = "null"
+                    #Add all details to the dictionary
                     itemsdetails[productdetail] = productdetailvalue
-                    itemsdetails["Link"] = link
-                    itemsdetails["Price"] = productcost
-                    #print itemsdetails
-            itemsstorage[producttitle] = itemsdetails
-            print str(len(stored) - count) + " " + id + " links remaining"
+            itemsdetails["Link"] = link
+            itemsdetails["Price"] = productcost
+            itemsstorage[producttitle] = itemsdetails #Store item details in Item storage for upload
+            print str(len(stored) - count) + " " + id + " links remaining" #Print number of links remaining
             #break
         except Exception:
             PrintException()
-    #PrintResutls(itemsstorage)
     return itemsstorage
 
 def ScraperUpload(item, sql, sql2):
     db = MySQLdb.connect("localhost", "root","","compcreator")
     cursor = db.cursor()
-    #print item + "\n" + itemsstorage[item]['Price'] + "\n" + itemsstorage[item]['Link']
     try:
        cursor.execute(sql)
        db.commit()
@@ -150,25 +118,6 @@ def ScraperUpload(item, sql, sql2):
        print sql
        print sql2
        db.rollback()
-
-
-        # print letters[0]
-        #lines = [span.get_text() for span in spans]
-        # for line in letters:
-        #    print line
-        # for item in listitem:
-
-        #    print "++++++++++++"
-
-        # except Exception,e:
-        #    print "ERROR set 2 "+str(e)
-
-
-    # for link in stored:
-    #    print link
-    # print count
-
-
 
 def CPU():
     urls = ["https://pricespy.co.nz/category.php?m=s321418940"]
@@ -259,7 +208,6 @@ def CASE():
         print str(count) + " uploads to DB remaining"
 
 #\[value-[0-9]{1,}\]
-
 #def SPARE():
 #    urls = [""]
 #    itemsstorage = ScraperMainTask(urls, "")
