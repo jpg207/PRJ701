@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 class PageView {
     public function Render($theModel) {
         $CurrentContent = $theModel->getPageContent();
+        $CurrentQuestion = $theModel->getQuestionContent();
         $Content = 1;
     ?>
 
@@ -14,7 +15,7 @@ class PageView {
       <?php include ($CurrentContent);?>
 
       <div class="footer l-box is-center">
-          Footer
+          Lets get building
       </div>
     </body>
   </html>

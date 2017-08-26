@@ -1,83 +1,53 @@
 <?php
-
 ?>
 
-
 <div class="content-wrapper">
+    <br>
     <div class="content">
-        <h2 class="content-head is-center">Find out more</h2>
+        <h2 class="content-head is-center">Lets build you a pc</h2>
 
         <div class="pure-g">
-            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
-
-                <h3 class="content-subhead">
-                    Quickly compile a build using the latest components
+            <div class="pure-u-1-1 pure-u-lg-1-8 side-menu">
+                <?php
+                if(sizeof($_SESSION['UserAnswers']) == 0){
+                ?>
+                    <div class="decision-history pure-u-lg-1-5 pure-u-md-1-3 pure-u-sm-1-2 pure-u-xs-1-1">
+                        <p>
+                            Your decitions will show here. <br>Click one to go back
+                        </p>
+                    </div>
+                <?php
+                }
+                ?>
+                <h3>
+                    Your Choices
                 </h3>
-                <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-                </p>
+                <?php
+                foreach ($_SESSION['UserAnswers'] as $key => $value) {?>
+                    <div class="decision-history pure-u-sm-3-24 pure-u-xs-1-1">
+                        <a href="controller.php?page=Generate&forceQuestion=<?php echo $key ?>"><p>
+                            <?php echo $key; ?> :
+                            <?php echo $value; ?>
+                        </p></a>
+                    </div>
+                    <br>
+                    <?php
+                }
+                ?>
             </div>
-            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
-                <h3 class="content-subhead">
-                  Scale builds based on your own usage
-                </h3>
-                <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-                </p>
-            </div>
-            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
-                <h3 class="content-subhead">
-                    Find places to buy components
-                </h3>
-                <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-                </p>
-            </div>
-            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
-                <h3 class="content-subhead">
-                    Learn about your builds components
-                </h3>
-                <p>
-                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
-                </p>
+            <div class="pure-u-1-1 pure-u-lg-1-12"></div>
+            <div class="pure-u-1-1 pure-u-lg-1-2 decision-content">
+                <div class="decision-content-inner">
+                    <form class="pure-form" action="controller.php?page=Generate" method="post">
+                        <fieldset>
+                                <?php
+                                include ($CurrentQuestion);
+                                ?>
+                        </fieldset>
+                    </form>
+                    <br />
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="ribbon l-box-lrg pure-g">
-        <div class="l-box-lrg is-center pure-u-1 pure-u-md-1-2 pure-u-lg-2-5">
-            <img width="300" alt="File Icons" class="pure-img-responsive" src="Images/">
-        </div>
-        <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-3-5">
-
-            <h2 class="content-head content-head-ribbon">Laboris nisi ut aliquip.</h2>
-
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                consequat. Duis aute irure dolor.
-            </p>
-        </div>
-    </div>
-
-    <div class="content">
-        <h2 class="content-head is-center">Dolore magna aliqua. Uis aute irure.</h2>
-        <div class="l-box-lrg pure-u-1 pure-u-md-3-6">
-            <h4>Contact Us</h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                consequat.
-            </p>
-
-            <h4>More Information</h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-        </div>
-    </div>
-
 </div>
