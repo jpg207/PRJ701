@@ -213,6 +213,7 @@ a.pure-button-primary {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     padding: 10px 10px 10px 0px;
+    min-height: 180px;
 }
 
 .side-menu h3{

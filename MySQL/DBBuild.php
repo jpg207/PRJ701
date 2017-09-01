@@ -4,7 +4,7 @@
     try {
           $sql = new DBConnection("compcreator");
 		  $sql->query("DROP DATABASE IF EXISTS CompCreator;");
-		  $sql->query("CREATE DATABASE CompCreator;");
+		  $sql->query("CREATE DATABASE CompCreator CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
 		  $sql->query("USE CompCreator;");
 		  $sql->query("DROP TABLE IF EXISTS CPU;");
 		  $sql->query("DROP TABLE IF EXISTS GPU;");
@@ -18,7 +18,7 @@
 		  $sql->query("CREATE TABLE Component(
 			CompID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
 			CompName VARCHAR(200) NOT NULL,
-			CompPrice VARCHAR(200) NOT NULL,
+			CompPrice DECIMAL(6,2) NOT NULL,
 			CompLink VARCHAR(200) NOT NULL );");
 
 		  $sql->query("CREATE TABLE CPU(
@@ -41,7 +41,7 @@
 			Virtualization VARCHAR(200),
 			CPURating DECIMAL (10, 2) NOT NULL,
 			CompID INT (10) NOT NULL,
-			FOREIGN KEY (CompID) REFERENCES Component(CompID) );");
+			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE );");
 
 		  $sql->query("CREATE TABLE GPU(
 			GPUID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,

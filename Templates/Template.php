@@ -3,7 +3,6 @@ error_reporting(E_ALL);
 class PageView {
     public function Render($theModel) {
         $CurrentContent = $theModel->getPageContent();
-        $CurrentQuestion = $theModel->getQuestionContent();
         $Content = 1;
     ?>
 

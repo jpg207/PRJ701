@@ -1,4 +1,5 @@
 <?php
+    $CurrentQuestion = $theModel->getQuestionContent();
 ?>
 
 <div class="content-wrapper">
@@ -8,6 +9,9 @@
 
         <div class="pure-g">
             <div class="pure-u-1-1 pure-u-lg-1-8 side-menu">
+                <h3>
+                    Your Choices
+                </h3>
                 <?php
                 if(sizeof($_SESSION['UserAnswers']) == 0){
                 ?>
@@ -18,11 +22,6 @@
                     </div>
                 <?php
                 }
-                ?>
-                <h3>
-                    Your Choices
-                </h3>
-                <?php
                 foreach ($_SESSION['UserAnswers'] as $key => $value) {?>
                     <div class="decision-history pure-u-sm-3-24 pure-u-xs-1-1">
                         <a href="controller.php?page=Generate&forceQuestion=<?php echo $key ?>"><p>
