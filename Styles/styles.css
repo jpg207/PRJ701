@@ -12,6 +12,9 @@ body {
 
 h1, h2, h3, h4, h5, h6, label {
     color: #34495e;
+    line-height: normal;
+    -webkit-margin-before: 0px;
+    -webkit-margin-after: 0px;
 }
 
 p {
@@ -205,6 +208,10 @@ a.pure-button-primary {
     width: 100%;
 }
 
+.pure-g{
+    letter-spacing: normal;
+}
+
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
@@ -214,6 +221,7 @@ a.pure-button-primary {
     border-bottom-right-radius: 5px;
     padding: 10px 10px 10px 0px;
     min-height: 180px;
+    width: 100%;
 }
 
 .side-menu h3{
@@ -246,7 +254,8 @@ a.pure-button-primary {
 .decision-content {
     min-height: 200px;
     padding: 2px;
-    border: 5px solid #1f8dd6;
+    background-color: #1f8dd6;
+    color: #ddd;
     border-radius: 5px;
 }
 
@@ -255,8 +264,71 @@ a.pure-button-primary {
     margin-left: 2.5%;
 }
 
-.decision-content p {
-    color: #34495e;
+.decision-content h3{
+    color: #ddd;
+}
+
+.decision-content input{
+    color: black;
+}
+
+.decision-content label{
+    color: #ddd;
+}
+
+.result-head{
+    float: left;
+    width: 100%;
+}
+
+.result-details{
+    width: 65%;
+    float: left;
+    border-left: 3px dotted white;
+    margin: 5px;
+    margin-bottom: 10px;
+}
+
+.result-item {
+    border: 3px solid white;
+    min-height: 98%;
+    margin: 5px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.result-container{
+    width: 100%;
+}
+
+.result-container.clicked{
+    width: 100%;
+}
+
+.detail-image{
+    width: 100px;
+}
+
+#page-wrap {
+  width: 600px;
+  margin: 15px auto;
+  position: relative;
+}
+
+.sidebar {
+  width: 190px;
+  position: fixed;
+  margin-left: 410px;
+}
+
+.expand_icon {
+    width: 15px;
+}
+
+.item-details{
+    word-wrap: break-word;
+    word-break: break-all;
+    text-align: left;
 }
 
 @media (min-width: 24em) {}
@@ -278,10 +350,33 @@ a.pure-button-primary {
     .l-box-lrg {
         border: none;
     }
+
+    .result-container{
+        width: 33.3%;
+    }
+
+    .result-container.clicked{
+        width: 100%;
+    }
+
+    .result-head{
+        width: 100%;
+    }
+
+    .result-head.clicked{
+        width: 31%;
+    }
 }
 
 @media (min-width: 78em) {
     .splash-head {
         font-size: 300%;
+    }
+
+    .side-menu{
+        position: fixed;
+        width: 20%;
+        float: left;
+        max-width: 300px;
     }
 }

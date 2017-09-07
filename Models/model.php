@@ -41,9 +41,11 @@
         }
 
         public function processBuild(){
-            $Build = array();
-            $budget = $_SESSION['UserAnswers']['Budget'];
-            if ($_SESSION['UserAnswers']['UserType'] == "Gamer") {
+            $Build = array();//Array of current build
+            $Choices = $_SESSION['UserAnswers'];//Loads user choices locally
+            $budget = $Choices['Budget'];//Gets user budget
+            //Weighting system, Based on users usage type this system determines how much of the budget will be spent on each component
+            if ($Choices['UserType'] == "Gamer") {
                 $CPUBudget = (20 / 100) * $budget;
                 $MOBOBudget = (15 / 100) * $budget;
                 $GPUBudget = (30 / 100) * $budget;
@@ -51,7 +53,7 @@
                 $RAMBudget = (10 / 100) * $budget;
                 $PSUBudget = (10 / 100) * $budget;
                 $CASEBudget = (5 / 100) * $budget;
-            }elseif ($_SESSION['UserAnswers']['UserType'] == "Home/School/Business") {
+            }elseif ($Choices['UserType'] == "Home/School/Business") {
                 $CPUBudget = (30 / 100) * $budget;
                 $MOBOBudget = (15 / 100) * $budget;
                 $GPUBudget = (10 / 100) * $budget;
@@ -68,24 +70,34 @@
                 $PSUBudget = (10 / 100) * $budget;
                 $CASEBudget = (5 / 100) * $budget;
             }
-
             $DBQueries = new DBQueries();
-            $result = $DBQueries->DBGetCPU($CPUBudget);
-            $Build['CPU']=$result;
-            $result = $DBQueries->DBGetMOBO();
-            $result = $DBQueries->DBGetGPU();
-            if($_SESSION['UserAnswers']['LocalStorage'] == "SSD"){
-                $result = $DBQueries->DBGetSSD();
-            }elseif ($_SESSION['UserAnswers']['LocalStorage'] == "HDD") {
-                $result = $DBQueries->DBGetHDD();
-            }else {
-                $result = $DBQueries->DBGetSSD();
-                $result = $DBQueries->DBGetHDD();
-            }
-            $result = $DBQueries->DBGetRAM();
-            $result = $DBQueries->DBGetPSU();
-            $result = $DBQueries->DBGetCase();
-            return $Build;
+            $Build['CPU'] = $DBQueries->DBGetCPU($CPUBudget);//Gets a CPU based on the budget and stores it as part of the current build
 
+            $Build['Case'] = $DBQueries->DBGetCase($CASEBudget, $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
+
+            $supportedMOBOFormats = explode(',', $Build['Case']['Format']);//Explodes the string of supported motherboard formats of the case by "," into an array
+            $Build['MOBO'] = $DBQueries->DBGetMOBO($MOBOBudget, $Build['CPU']['Socket'], $supportedMOBOFormats);//Gets a CPU based on the budget, CPU Socket and Supported motherboard formats of the case and stores it as part of the current build
+
+            $Build['GPU'] = $DBQueries->DBGetGPU($GPUBudget);//Gets a GPU based on the budget and stores it as part of the current build
+
+            //Depeneding on wether the user picked SSD only, HDD only or Mixed storage, they will be got based on the budget and added to the current build
+            if($_SESSION['UserAnswers']['LocalStorage'] == "SSD"){
+                $Build['SSD'] = $DBQueries->DBGetSSD($StorageBudget);
+            }elseif ($_SESSION['UserAnswers']['LocalStorage'] == "HDD") {
+                $Build['HDD'] = $DBQueries->DBGetHDD($StorageBudget);
+            }else {
+                //If Mixed is picked, the budget is split based on the higher cost of SSD's
+                $HDDBudget = (35/100) * $StorageBudget;
+                $Build['HDD'] = $DBQueries->DBGetHDD($HDDBudget);
+
+                $SSDBudget = (65/100) * $StorageBudget;
+                $Build['SSD'] = $DBQueries->DBGetSSD($SSDBudget);
+            }
+
+            $Build['RAM'] = $DBQueries->DBGetRAM($RAMBudget, $Build['MOBO']['Typeofmemory'], $Build['MOBO']['Memoryslots']);//Gets RAM based on the budget and stores it as part of the current build
+
+            $Build['PSU'] = $DBQueries->DBGetPSU($PSUBudget);//Gets a PSU based on the budget and stores it as part of the current build
+
+            return $Build;//Returns the current build back to the front end for display
         }
     }
