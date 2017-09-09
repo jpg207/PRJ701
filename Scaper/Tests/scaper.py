@@ -1,6 +1,6 @@
 import urllib
 
-urls = ["https://pricespy.co.nz/","https://google.co.nz/"]
+urls = ["https://www.videocardbenchmark.net/gpu_list.php"]
 
 i=0
 

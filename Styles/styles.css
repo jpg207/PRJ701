@@ -279,20 +279,19 @@ a.pure-button-primary {
 .result-head{
     float: left;
     width: 100%;
+    padding: 5px;
 }
 
 .result-details{
-    width: 65%;
+    width: 100%;
     float: left;
     border-left: 3px dotted white;
     margin: 5px;
-    margin-bottom: 10px;
 }
 
 .result-item {
-    border: 3px solid white;
-    min-height: 98%;
-    margin: 5px;
+    border: 2px solid white;
+    height: 100%;
     border-radius: 5px;
     text-align: center;
 }
@@ -337,16 +336,20 @@ a.pure-button-primary {
     body {
         font-size: 16px;
     }
+
     .home-menu {
         text-align: left;
     }
+
     .splash {
         width: 50%;
         height: 50%;
     }
+
     .splash-head {
         font-size: 250%;
     }
+
     .l-box-lrg {
         border: none;
     }
@@ -365,6 +368,10 @@ a.pure-button-primary {
 
     .result-head.clicked{
         width: 31%;
+    }
+
+    .result-details{
+        width: 65%;
     }
 }
 

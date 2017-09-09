@@ -71,19 +71,26 @@
                 $CASEBudget = (5 / 100) * $budget;
             }
             $DBQueries = new DBQueries();
-            $Build['CPU'] = $DBQueries->DBGetCPU($CPUBudget);//Gets a CPU based on the budget and stores it as part of the current build
 
             $Build['Case'] = $DBQueries->DBGetCase($CASEBudget, $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
 
-            $supportedMOBOFormats = explode(',', $Build['Case']['Format']);//Explodes the string of supported motherboard formats of the case by "," into an array
-            $Build['MOBO'] = $DBQueries->DBGetMOBO($MOBOBudget, $Build['CPU']['Socket'], $supportedMOBOFormats);//Gets a CPU based on the budget, CPU Socket and Supported motherboard formats of the case and stores it as part of the current build
+            $supportedMOBOFormats = explode(',', $Build['Case']['SupportedMotherboards']);//Explodes the string of supported motherboard formats of the case by "," into an array
+            $Build['MOBO'] = $DBQueries->DBGetMOBO($MOBOBudget, $supportedMOBOFormats, $Choices['WiFi']);//Gets a CPU based on the budget, CPU Socket and Supported motherboard formats of the case and stores it as part of the current build
+
+            $Build['CPU'] = $DBQueries->DBGetCPU($CPUBudget, $Build['MOBO']['Socket']);//Gets a CPU based on the budget and stores it as part of the current build
 
             $Build['GPU'] = $DBQueries->DBGetGPU($GPUBudget);//Gets a GPU based on the budget and stores it as part of the current build
 
+            $Build['RAM'] = $DBQueries->DBGetRAM($RAMBudget, $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots']);//Gets RAM based on the budget and stores it as part of the current build
+
             //Depeneding on wether the user picked SSD only, HDD only or Mixed storage, they will be got based on the budget and added to the current build
             if($_SESSION['UserAnswers']['LocalStorage'] == "SSD"){
+                $SSDBudget = $StorageBudget;
+                $HDDBudget = 0;
                 $Build['SSD'] = $DBQueries->DBGetSSD($StorageBudget);
             }elseif ($_SESSION['UserAnswers']['LocalStorage'] == "HDD") {
+                $HDDBudget = $StorageBudget;
+                $SSDBudget = 0;
                 $Build['HDD'] = $DBQueries->DBGetHDD($StorageBudget);
             }else {
                 //If Mixed is picked, the budget is split based on the higher cost of SSD's
@@ -94,9 +101,12 @@
                 $Build['SSD'] = $DBQueries->DBGetSSD($SSDBudget);
             }
 
-            $Build['RAM'] = $DBQueries->DBGetRAM($RAMBudget, $Build['MOBO']['Typeofmemory'], $Build['MOBO']['Memoryslots']);//Gets RAM based on the budget and stores it as part of the current build
-
             $Build['PSU'] = $DBQueries->DBGetPSU($PSUBudget);//Gets a PSU based on the budget and stores it as part of the current build
+
+            $ComponentBudget = array('Case' => $CASEBudget, 'MOBO' => $MOBOBudget, 'CPU' => $CPUBudget, 'GPU' => $GPUBudget,
+            'HDD' => $HDDBudget, 'SSD' => $SSDBudget, 'RAM' => $RAMBudget, 'PSU' => $PSUBudget);
+
+            $Build['ComponentBudget'] = $ComponentBudget;
 
             return $Build;//Returns the current build back to the front end for display
         }
