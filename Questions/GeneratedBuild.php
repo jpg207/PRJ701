@@ -1,6 +1,7 @@
 <?php
     $CurrentBuild = $theModel->processBuild();
     $price = 0;
+    if (count($CurrentBuild) > 2) {
 ?>
 
 <h3>Build complete</h3>
@@ -8,23 +9,33 @@
     The following results are what we recommend for your system:
 </p>
 
+<?php }else{ ?>
+
+<img class="attentionimage" src="../Images/Attention.png" alt="">
+<h3>Sorry about this</h3>
+<p>
+    We cannot create a build for you, this is normally due to budget constrants, try increasing your budget
+</p>
+
+<?php } ?>
+
 <div class="pure-g">
     <?php
-    foreach ($CurrentBuild as $key => $item) {
-        if ($key != "ComponentBudget") {?>
+    foreach ($CurrentBuild as $key => $BuildItem) {
+        if ($key != "ComponentBudget" && isset($BuildItem['CompName'])) {?>
             <div class="result-container">
                 <div class="result-item">
                     <div class="result-head">
                         <p>
-                            <a href="<?php echo $item["CompLink"]?>" target="_blank">
+                            <a href="<?php echo $BuildItem["CompLink"]?>" target="_blank">
                                 <h3><?php echo "<br />" . $key . ": <br />";?></h3>
                                 <img class="detail-image" src="../Images/<?php echo $key; ?>.png" alt="">
                             </a>
-                            <a href="<?php echo $item["CompLink"]?>" target="_blank">
+                            <a href="<?php echo $BuildItem["CompLink"]?>" target="_blank">
                                 <?php
-                                echo  "<br /> <b>" . preg_replace('#\s*\(.+\)\s*#U', '', $item['CompName'] ) . "</b>";
-                                echo  "<br /> $" . $item['CompPrice'];
-                                $price = $price + $item['CompPrice'];
+                                echo  "<br /> <b><u>" . preg_replace('#\s*\(.+\)\s*#U', '', $BuildItem['CompName'] ) . "</u></b>";
+                                echo  "<br /> $" . $BuildItem['CompPrice'];
+                                $price = $price + $BuildItem['CompPrice'];
                                 ?>
                             </a>
                         </p>
@@ -34,51 +45,87 @@
                             </div>
                         </div>
                     </div>
-                    <div class="result-details" style="display:none">
-                        <p class="item-details">
-                            <?php foreach($item as $key => $detail){
-                                if($detail != "0" && $key == "ProductPage"){
-                                    echo "<b>" . $key . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
-                                }elseif ($detail != "0" && !preg_match("/Comp/",$key)) {
-                                    echo "<b>" . preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key) . ": </b> " . $detail . "<br />";
+                    <div class="dropdown"  style="display:none">
+                        <div class="result-details">
+                            <b>Component Specs:</b><br />
+                            Full specs are listed bellow
+                            <div class="line">
+                            </div>
+                            <p class="item-details">
+                                <?php foreach($BuildItem as $key => $detail){
+                                    if ($key != "Alts") {
+                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
+                                        if($detail != "0" && $key == "ProductPage"){
+                                            echo "<b>" . $KeyName . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
+                                        }elseif ($detail != "0" && !preg_match("/Comp/",$key)) {
+                                            echo "<b>" . $KeyName . ": </b> " . $detail . "<br />";
+                                        }
+                                    }
+                                }?>
+                            </p>
+                        </div>
+
+                        <div class="learn-details">
+                            <b>Other opitions:</b><br />
+                            Core differences are listed bellow
+                            <p class="item-details">
+                            <?php
+                            foreach ($BuildItem['Alts'] as $AltArray) {
+                                if ($BuildItem['CompName'] != $AltArray['CompName']) {
+                                    echo "<div class='Alts'>";
+                                    echo "<b>Name:</b> <u><a href=" . $AltArray['CompLink'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
+                                    echo "<b>Price:</b> $" . $AltArray['CompPrice'] . "<br />";
+                                    foreach ($AltArray as $key => $value) {
+                                        if ($value != "0" && !preg_match("/Comp/",$key) && $BuildItem[$key] != $value) {
+                                            $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
+                                            echo "<b>" . $KeyName . ": </b> " . $value . "<br />";
+                                        }
+                                    }
+                                    echo "<br /></div>";
                                 }
-                            }?>
-                        </p>
+                            }
+                            ?>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
     <?php
         }
-    } ?>
+    }
 
-    <div class="result-container">
-        <div class="result-item">
-            <div class="result-head">
-                <p>
-                    <h3><br />Total price <br /></h3>
-                    <img class="detail-image" src="../Images/Dollar.png" alt="">
-                        <br /><b>Price to build system:</b></b>
-                        <?php
-                            echo  "<br /> $" . $price;
-                        ?>
-                    </a>
-                </p>
-                <div class="header_background">
-                    <div class="sub_header">
-                        <p><img class="expand_icon" alt="" src="../Images/plus.png">Details</p>
+    if (count($CurrentBuild) > 2) {
+    ?>
+        <div class="result-container">
+            <div class="result-item">
+                <div class="result-head">
+                    <p>
+                        <h3><br />Total price <br /></h3>
+                        <img class="detail-image" src="../Images/Dollar.png" alt="">
+                            <br /><b>Price to build system:</b></b>
+                            <?php
+                                echo  "<br /> $" . $price . " out of $" . $_SESSION['UserAnswers']['Budget'];
+                            ?>
+                        </a>
+                    </p>
+                    <div class="header_background">
+                        <div class="sub_header">
+                            <p><img class="expand_icon" alt="" src="../Images/plus.png">Details</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="result-details" style="display:none">
-                <p class="item-details">
-                    <?php
-                    foreach ($CurrentBuild as $key => $item) {
-                        if ($key != "ComponentBudget") {
-                            echo  "<b>" . $key . ":</b> $" . $item['CompPrice'] . " out  of $" . $CurrentBuild['ComponentBudget'][$key] . "<br />";
-                        }
-                    } ?>
-                </p>
+                <div class="dropdown result-details result-cost-summary" style="display:none">
+                    <p class="item-details">
+                        <?php
+                        foreach ($CurrentBuild as $key => $item) {
+                            if ($key != "ComponentBudget") {
+                                echo  "<b>" . $key . ":</b> $" . $item['CompPrice'] . " out  of $" . round($CurrentBuild['ComponentBudget'][$key],  2) . "<br />";
+                            }
+                        } ?>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
+    <?php
+    }?>
 </div>

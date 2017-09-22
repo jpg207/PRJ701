@@ -7,7 +7,7 @@
     1-2
 </label>
 <label for="option-two" class="pure-radio">
-    <input id="option-two" type="radio" name="Programs" value="3-6" required>
+    <input id="option-two" type="radio" name="Programs" value="3-5" required>
     3-6
 </label>
 <label for="option-three" class="pure-radio">

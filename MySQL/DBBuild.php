@@ -16,13 +16,13 @@
 		  $sql->query("DROP TABLE IF EXISTS Component;");
 
 		  $sql->query("CREATE TABLE Component(
-			CompID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			CompID INT(10) PRIMARY KEY NOT NULL,
 			CompName VARCHAR(200) NOT NULL,
 			CompPrice DECIMAL(6,2) NOT NULL,
 			CompLink VARCHAR(200) NOT NULL );");
 
 		  $sql->query("CREATE TABLE CPU(
-			CPUID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			CPUID INT(10) PRIMARY KEY NOT NULL,
 			ClockFrequency DECIMAL(10,2),
 			ProductPage VARCHAR(200),
 			L3Cache DECIMAL(10,2),
@@ -39,12 +39,12 @@
 			ThermalDesignPower INT(8),
 			IntegratedGraphics VARCHAR(200),
 			Virtualization VARCHAR(200),
-			CPURating DECIMAL (10, 2) NOT NULL,
+			CPURating INT (10) NOT NULL,
 			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE );");
 
 		  $sql->query("CREATE TABLE GPU(
-			GPUID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			GPUID INT(10) PRIMARY KEY NOT NULL,
 			Cooling VARCHAR(200),
 			NumberOfFans INT(8),
 			SemiPassive VARCHAR(200),
@@ -80,12 +80,12 @@
 			ManufacturerWarranty INT(8),
 			ReleaseYear INT(8),
 			ProductPage VARCHAR(200),
-			GPURating DECIMAL (10,2),
+			GPURating INT (10),
 			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE SystemCase(
-			CaseID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			CaseID INT(10) PRIMARY KEY NOT NULL,
 			TypeOfChassis VARCHAR(200),
 			Material VARCHAR(200),
 			Dimensions VARCHAR(200),
@@ -109,14 +109,14 @@
 			FanSpacesTotal VARCHAR(200),
 			MaximumMotherboardSize VARCHAR(200),
 			25DriveBays INT(8),
-			MaxCPUcoolerheight DECIMAL(10,2),
+			MaxCPUCoolerHeight DECIMAL(10,2),
 			BuiltInWatercooling VARCHAR(200),
 			FrontConnections VARCHAR(200),
 			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE PSU(
-			PSUID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			PSUID INT(10) PRIMARY KEY NOT NULL,
 			Capacity  INT(8),
 			ReleaseYear INT(8),
 			FanSize INT(8),
@@ -136,7 +136,7 @@
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE SSD(
-			SSDID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			SSDID INT(10) PRIMARY KEY NOT NULL,
 			MaximumReadSpeed INT(8),
 			ControllerChip VARCHAR(200),
 			PricePerGigabyte DECIMAL(10,2),
@@ -153,7 +153,7 @@
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE HDD(
-			HDDID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			HDDID INT(10) PRIMARY KEY NOT NULL,
 			InternalTransferRate INT(8),
 			ProductPage VARCHAR(200),
 			HybridDisk VARCHAR(200),
@@ -171,7 +171,7 @@
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE Memory(
-			MemID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			MemID INT(10) PRIMARY KEY NOT NULL,
 			NumberOfModules INT(8),
 			MemorySpeed VARCHAR(200),
 			MemoryCapacity INT(8),
@@ -188,7 +188,7 @@
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE MotherBoard(
-			MoboID INT(10) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+			MoboID INT(10) PRIMARY KEY NOT NULL,
 			Width VARCHAR(200),
 			Cooling VARCHAR(200),
 			FormFactor VARCHAR(200),

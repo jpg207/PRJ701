@@ -1,5 +1,9 @@
 <?php
     $CurrentQuestion = $theModel->getQuestionContent();
+    if (!isset($_SESSION['UserAnswers'])) {
+        $UserAnswers = array();
+        $_SESSION['UserAnswers'] = $UserAnswers;
+    }
 ?>
 
 <div class="content-wrapper">
@@ -8,7 +12,7 @@
         <h2 class="content-head is-center">Lets build you a pc</h2>
         <div class="pure-g">
             <div class="pure-u-1-1 pure-u-xl-1-4"></div>
-            <div class="pure-u-1-1 pure-u-xl-1-2 decision-content">
+            <div class="pure-u-1-1 pure-u-xl-5-8 decision-content">
                 <div class="decision-content-inner">
                     <form class="pure-form" action="controller.php?page=Generate" method="post">
                         <fieldset>

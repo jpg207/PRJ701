@@ -23,7 +23,7 @@ def PrintResults(itemsstorage):
             print "        " + itemdet + "  D:  " + itemsstorage[item][itemdet]
         print "\n ++++++++++++++++++++++++ \n"
 
-def ScraperMainTask(url, id, mainregex):
+def ScraperPassMarkTask(url, id, mainregex):
     itemsstorage = {}
     dualregex = r'(Dual)'
     removeat = r'@.*'

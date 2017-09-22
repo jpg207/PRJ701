@@ -17,16 +17,17 @@
     <script type="text/javascript">
     $(document).ready(function() {
         $('.header_background').click(function(e) {
-            if ($(this).parent().next('.result-details').is(':visible')){
+            if ($(this).parent().next('.dropdown').is(':visible')){
                 var object = this;
-                $(this).parent().next('.result-details').slideUp('slow', function(){
+                $(this).parent().next('.dropdown').slideUp('slow', function(){
                     $(object).parent().parent().parent().toggleClass('clicked');
                     $(object).parent('.result-head').toggleClass('clicked');
                 });
                 var img = $(this).find('img.expand_icon')[0];
                 img.src = '../Images/plus.png';
             }else{
-                $(this).parent().next('.result-details').slideDown('slow');
+                $(this).parent().next('.dropdown').slideDown('slow');
+                $(this).parent().next('.dropdown').slideDown('slow');
                 $(this).parent().parent().parent().toggleClass('clicked');
                 $(this).parent('.result-head').toggleClass('clicked');
                 var img = $(this).find('img.expand_icon')[0];
