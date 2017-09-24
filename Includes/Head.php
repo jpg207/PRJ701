@@ -34,6 +34,10 @@
                 img.src  = '../Images/minus.png';
             }
         });
+
+        $('.price-container').click(function(e) {
+            $('.price').toggleClass('clicked');
+        });
     });
     </script>
 </head>

@@ -82,8 +82,8 @@
                     throw new Exception("Could not find a motherboard that fit your requirements");
                 }
 
-                $Build['GPU'] = $DBQueriesGenerate->DBGetGPU($ComponentBudget['GPU']);//Gets a GPU based on the budget and stores it as part of the current build
-                $Build['GPU']['Alts'] = $DBQueriesSuggestions->DBGetGPUAlt($ComponentBudget['GPU'], $Build['GPU']['GPURating']);
+                $Build['GPU'] = $DBQueriesGenerate->DBGetGPU($ComponentBudget['GPU'], $Build['Case']['MaximumLengthOfVideoCard']);//Gets a GPU based on the budget and stores it as part of the current build
+                $Build['GPU']['Alts'] = $DBQueriesSuggestions->DBGetGPUAlt($ComponentBudget['GPU'], $Build['GPU']['GPURating'], $Build['Case']['MaximumLengthOfVideoCard']);
 
                 $Build['RAM'] = $DBQueriesGenerate->DBGetRAM($ComponentBudget['RAM'], $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots']);//Gets RAM based on the budget and stores it as part of the current build
                 $Build['RAM']['Alts'] = $DBQueriesSuggestions->DBGetRAMAlt($ComponentBudget['RAM'], $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots'], $Build['RAM']['MemoryCapacity']);

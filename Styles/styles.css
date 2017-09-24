@@ -229,6 +229,19 @@ a.pure-button-primary {
     margin: 5px;
 }
 
+.side-menu2 {
+    background-color: #2d3e50;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 10px 10px 10px 0px;
+    width: 100%;
+}
+
+.side-menu2 h3{
+    color: #ddd;
+    margin: 5px;
+}
+
 .decision-history {
     border-bottom: dotted;
     border-top: dotted;
@@ -240,6 +253,7 @@ a.pure-button-primary {
     -moz-transition: .5s;
     -webkit-transition: .5s;
     width: 100%;
+    color: #C2C1C1;
 }
 
 .decision-history:hover {
@@ -287,7 +301,6 @@ a.pure-button-primary {
     float: left;
     width: 100%;
     margin: 5px;
-    text-indent: 0px;
 }
 
 .result-item {
@@ -329,6 +342,8 @@ a.pure-button-primary {
 
 .expand_icon {
     width: 15px;
+    cursor: pointer;
+    cursor: hand;
 }
 
 .item-details{
@@ -350,7 +365,21 @@ a.pure-button-primary {
 .dropdown{
     width: 100%;
     text-align: left;
-    text-indent: 5px;
+}
+
+.price-container{
+    padding: 5px;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.price{
+    display:none
+}
+
+.price.clicked{
+    display: block;
+    width: 100%;
 }
 
 @media (min-width: 24em) {}
@@ -419,5 +448,13 @@ a.pure-button-primary {
         width: 20%;
         float: left;
         max-width: 300px;
+    }
+
+    .side-menu2{
+        position: fixed;
+        width: 20%;
+        float: left;
+        max-width: 300px;
+        top: 550px;
     }
 }

@@ -22,7 +22,7 @@
 			CompLink VARCHAR(200) NOT NULL );");
 
 		  $sql->query("CREATE TABLE CPU(
-			CPUID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			ClockFrequency DECIMAL(10,2),
 			ProductPage VARCHAR(200),
 			L3Cache DECIMAL(10,2),
@@ -40,11 +40,10 @@
 			IntegratedGraphics VARCHAR(200),
 			Virtualization VARCHAR(200),
 			CPURating INT (10) NOT NULL,
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE );");
 
 		  $sql->query("CREATE TABLE GPU(
-			GPUID INT(10) PRIMARY KEY NOT NULL,
+            CompID INT (10)PRIMARY KEY NOT NULL,
 			Cooling VARCHAR(200),
 			NumberOfFans INT(8),
 			SemiPassive VARCHAR(200),
@@ -62,7 +61,7 @@
 			VGAOutputs VARCHAR(200),
 			MaximumResolution VARCHAR(200),
 			NumberOfSupportedMonitors INT(8),
-			Length VARCHAR(200),
+			Length INT(8),
 			NumberOfSlots INT(8),
 			DirectX DECIMAL(10,2),
 			HDR VARCHAR(200),
@@ -81,11 +80,10 @@
 			ReleaseYear INT(8),
 			ProductPage VARCHAR(200),
 			GPURating INT (10),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE SystemCase(
-			CaseID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			TypeOfChassis VARCHAR(200),
 			Material VARCHAR(200),
 			Dimensions VARCHAR(200),
@@ -112,11 +110,10 @@
 			MaxCPUCoolerHeight DECIMAL(10,2),
 			BuiltInWatercooling VARCHAR(200),
 			FrontConnections VARCHAR(200),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE PSU(
-			PSUID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			Capacity  INT(8),
 			ReleaseYear INT(8),
 			FanSize INT(8),
@@ -132,11 +129,10 @@
 			Semipassive VARCHAR(200),
 			Format VARCHAR(200),
 			80PlusCertification VARCHAR(200),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE SSD(
-			SSDID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			MaximumReadSpeed INT(8),
 			ControllerChip VARCHAR(200),
 			PricePerGigabyte DECIMAL(10,2),
@@ -149,11 +145,10 @@
 			Weight VARCHAR(200),
 			MaximumWriteSpeed INT(8),
 			Size INT(8),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE HDD(
-			HDDID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			InternalTransferRate INT(8),
 			ProductPage VARCHAR(200),
 			HybridDisk VARCHAR(200),
@@ -167,11 +162,10 @@
 			RotationalSpeed VARCHAR(200),
 			NoiseLevel VARCHAR(200),
 			HardDriveSize DECIMAL(10,2),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE Memory(
-			MemID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			NumberOfModules INT(8),
 			MemorySpeed VARCHAR(200),
 			MemoryCapacity INT(8),
@@ -184,11 +178,10 @@
 			TypeOfMemory VARCHAR(200),
 			ProductPage VARCHAR(200),
 			Voltage VARCHAR(200),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);");
 
 		  $sql->query("CREATE TABLE MotherBoard(
-			MoboID INT(10) PRIMARY KEY NOT NULL,
+			CompID INT (10)PRIMARY KEY NOT NULL,
 			Width VARCHAR(200),
 			Cooling VARCHAR(200),
 			FormFactor VARCHAR(200),
@@ -242,7 +235,6 @@
 			VGAOutputs VARCHAR(200),
 			WirelessNetwork VARCHAR(200),
 			SATA6Gbs VARCHAR(200),
-			CompID INT (10) NOT NULL,
 			FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);
 		  ");
 

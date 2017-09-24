@@ -55,6 +55,7 @@
                                 <?php foreach($BuildItem as $key => $detail){
                                     if ($key != "Alts") {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
+                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
                                         if($detail != "0" && $key == "ProductPage"){
                                             echo "<b>" . $KeyName . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
                                         }elseif ($detail != "0" && !preg_match("/Comp/",$key)) {
@@ -73,11 +74,14 @@
                             foreach ($BuildItem['Alts'] as $AltArray) {
                                 if ($BuildItem['CompName'] != $AltArray['CompName']) {
                                     echo "<div class='Alts'>";
-                                    echo "<b>Name:</b> <u><a href=" . $AltArray['CompLink'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
+                                    echo "<b>Name:</b> <u><a href=https://pricespy.co.nz/product.php?j=" . $BuildItem['CompID'] . "," . $AltArray['CompID'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
                                     echo "<b>Price:</b> $" . $AltArray['CompPrice'] . "<br />";
                                     foreach ($AltArray as $key => $value) {
-                                        if ($value != "0" && !preg_match("/Comp/",$key) && $BuildItem[$key] != $value) {
-                                            $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
+                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
+                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
+                                        if ($value != "0" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
+                                            echo "<div style='color:#b2b2b2;'><b>" . $KeyName . ": </b> " . $value . "<br /></div>";
+                                        }elseif ($value != "0" && !preg_match("/Comp/",$key)) {
                                             echo "<b>" . $KeyName . ": </b> " . $value . "<br />";
                                         }
                                     }
@@ -93,39 +97,5 @@
     <?php
         }
     }
-
-    if (count($CurrentBuild) > 2) {
     ?>
-        <div class="result-container">
-            <div class="result-item">
-                <div class="result-head">
-                    <p>
-                        <h3><br />Total price <br /></h3>
-                        <img class="detail-image" src="../Images/Dollar.png" alt="">
-                            <br /><b>Price to build system:</b></b>
-                            <?php
-                                echo  "<br /> $" . $price . " out of $" . $_SESSION['UserAnswers']['Budget'];
-                            ?>
-                        </a>
-                    </p>
-                    <div class="header_background">
-                        <div class="sub_header">
-                            <p><img class="expand_icon" alt="" src="../Images/plus.png">Details</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="dropdown result-details result-cost-summary" style="display:none">
-                    <p class="item-details">
-                        <?php
-                        foreach ($CurrentBuild as $key => $item) {
-                            if ($key != "ComponentBudget") {
-                                echo  "<b>" . $key . ":</b> $" . $item['CompPrice'] . " out  of $" . round($CurrentBuild['ComponentBudget'][$key],  2) . "<br />";
-                            }
-                        } ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-    <?php
-    }?>
 </div>

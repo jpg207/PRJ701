@@ -41,13 +41,29 @@
                 foreach ($_SESSION['UserAnswers'] as $key => $value) {?>
                     <div class="decision-history">
                         <a href="controller.php?page=Generate&forceQuestion=<?php echo $key ?>"><p>
-                            <?php echo $key . ": " . $value; ?>
+                            <?php echo "<b>" . $key . "</b>: " . $value; ?>
                         </p></a>
                     </div>
-                    <?php
-                }
-                ?>
+                <?php } ?>
             </div>
+
+            <?php if (isset($CurrentBuild)) { ?>
+                <div class="side-menu2">
+                    <h3>
+                        Price list:
+                    </h3>
+                    <div class="decision-history price-container">
+                        <?php echo  "<b>Total:</b> $" . $price . " out of $" . $_SESSION['UserAnswers']['Budget'] . "<br />"; ?>
+                        <div class="price">
+                            <?php foreach ($CurrentBuild as $key => $item) {
+                                if ($key != "ComponentBudget") {
+                                    echo  "<b>" . $key . ":</b> $" . $item['CompPrice'] . " out  of $" . round($CurrentBuild['ComponentBudget'][$key],  2) . "<br />";
+                                }
+                            } ?>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
         </div>
     </div>
 </div>
