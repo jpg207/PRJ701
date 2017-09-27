@@ -4,8 +4,9 @@ import urllib
 import re
 from bs4 import BeautifulSoup
 import MySQLdb
+reload(sys)
+sys.setdefaultencoding('utf8')
 
-default = 0
 base = "https://pricespy.co.nz"
 page = "https://pricespy.co.nz/category.php"
 
@@ -22,7 +23,7 @@ def PrintResults(itemsstorage):
     for item in itemsstorage:
         print  item
         for itemdet in itemsstorage[item]:
-            print "        " + itemdet + "  D:  " + itemsstorage[item][itemdet]
+            print "        " + itemdet #+ "  D:  " + str(itemsstorage[item][itemdet])
         print "\n ++++++++++++++++++++++++ \n"
 
 def ScraperMainTask(urls, id):
@@ -86,6 +87,7 @@ def ScraperMainTask(urls, id):
                 product = product.get_text() #Get detail text
                 #Remove unwanted information from text
                 product = product.replace("Suggest change - Beta","")
+
                 product = re.sub(cutregex , "", product)
                 if not linkregex.search(product):
                     product = product.replace("->", "")
@@ -101,14 +103,14 @@ def ScraperMainTask(urls, id):
                     productdetail = product.group(1).replace(" ", "")
                     productdetailvalue = product.group(2).strip()
                     if productdetailvalue == "Contribute": #Null detail if only value is Contribute
-                        productdetailvalue = default
+                        productdetailvalue = None
                     else:
                         #Add all details to the dictionary
                         productdetailvalue = productdetailvalue.encode('utf-8')
                     itemsdetails[productdetail] = productdetailvalue
             itemsdetails["Link"] = link.encode('utf-8')
-            ItemID = re.search(idsort, itemsdetails["Link"])
-            itemsdetails["ItemID"] = ItemID.group()
+            CompID = re.search(idsort, itemsdetails["Link"])
+            itemsdetails["CompID"] = CompID.group()
             itemsdetails["Price"] = productcost.encode('utf-8')
             itemsstorage[producttitle] = itemsdetails #Store item details in Item storage for upload
             #for i in itemsdetails:
@@ -117,14 +119,38 @@ def ScraperMainTask(urls, id):
             #break
         except Exception:
             PrintException()
+    #PrintResults(itemsstorage)
     return itemsstorage
+
+def ScraperCreateStatement(itemsstorage, item):
+    feildsquery = ""
+    detailsquery = ""
+    for detail in itemsstorage[item]:
+        if detail != "Link" and detail != "Price":
+            processeddetail = re.sub(r'[^a-zA-Z0-9]', '', detail)
+            if feildsquery == "":
+                try:
+                    feildsquery = "`" + processeddetail + "`"
+                    detailsquery = "'" + str(itemsstorage[item][detail]) + "'"
+                except Exception as e:
+                    print "Nothing"
+                detailsquery = "'" + str(itemsstorage[item][detail]) + "'"
+            else:
+                try:
+                    feildsquery = feildsquery + ", `" + processeddetail + "`"
+                    detailsquery = detailsquery + ", '" + str(itemsstorage[item][detail])  + "'"
+                except Exception as e:
+                    print "Nothing"
+    return feildsquery, detailsquery
 
 def ScraperUpload(ComponentUpload, DetailsUpload):
     db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
     cursor = db.cursor()
     try:
+        #print ComponentUpload
         cursor.execute(ComponentUpload)
         db.commit()
+        #print DetailsUpload
         cursor.execute(DetailsUpload)
         db.commit()
     except MySQLdb.Error, e:
@@ -132,16 +158,12 @@ def ScraperUpload(ComponentUpload, DetailsUpload):
        print "MySQL failiure: " + str(e)
        db.rollback()
 
-def ScraperDelete(delete):
+def RemoveLegacyItems():
     try:
         db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
         cursor = db.cursor()
-        cursor.execute("""SELECT CompID FROM %s""" % (delete))
-        results = cursor.fetchall()
-        for row in results:
-            cursor.execute("""DELETE FROM component WHERE CompID = %s""" % (row))
-        db.commit()
-        print "Table " + delete + " has been cleared of data!!"
+        cursor.execute("""DELETE FROM component WHERE CompDate < NOW() - INTERVAL 1 DAY""")
+        print "Legacy data has been cleared!!"
     except MySQLdb.Error, e:
        # Rollback in case there is any error
        print "MySQL failiure: " + str(e)
@@ -177,9 +199,10 @@ def ScraperPassMarkTask(passmarkurl, id, passmarkregex):
                 column += 1
             if ItemRow['Price'] != "NA":
                 itemsstorage[ItemRow["Name"]] = ItemRow
+            break
     except Exception:
         PrintException()
-    #PrintResults(itemsstorage)
+    PrintResults(itemsstorage)
     return itemsstorage
 
 def ScraperUploadPassMark(DetailsUpload):
@@ -198,10 +221,10 @@ def CPU():
     urls = ["https://pricespy.co.nz/category.php?m=s321418940"]
     itemsstorage = ScraperMainTask(urls, "CPU")
     count = len(itemsstorage)
-    ScraperDelete("cpu")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']), """REPLACE  INTO `cpu`(`ClockFrequency`, `ProductPage`, `L3Cache`, `TurboBoostCore`, `CPUType`, `BoxVersion`, `NumberOfThreads`, `64bitProcessor`, `L2Cache`, `Socket`, `NumberOfCores`, `GraphicsProcessor`, `ReleaseYear`, `ThermalDesignPower`, `IntegratedGraphics`, `Virtualization`, `CPURating`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 999999, '%s')""" %(itemsstorage[item].setdefault('Clockfrequency', default), itemsstorage[item].setdefault('Productpage', default), itemsstorage[item].setdefault('L3cache', default), itemsstorage[item].setdefault('TurboBoost/Core', default), itemsstorage[item].setdefault('CPUtype', default), itemsstorage[item].setdefault('Boxversion', default), itemsstorage[item].setdefault('Numberofthreads', default), itemsstorage[item].setdefault('64-bitprocessor', default), itemsstorage[item].setdefault('L2cache', default), itemsstorage[item].setdefault('Socket', default), itemsstorage[item].setdefault('Numberofcores', default), itemsstorage[item].setdefault('Graphicsprocessor', default), itemsstorage[item].setdefault('Releaseyear', default), itemsstorage[item].setdefault('ThermalDesignPower', default), itemsstorage[item].setdefault('Integratedgraphics', default), itemsstorage[item].setdefault('Virtualization', default), itemsstorage[item]['ItemID']  ))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']), """REPLACE  INTO `CPU`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
     passmarkurl = "https://www.cpubenchmark.net/cpu_list.php"
     passmarkregex = r'(cpu[\d]*)'
@@ -217,10 +240,10 @@ def GPU():
     urls = ["https://pricespy.co.nz/category.php?m=s321383620"]
     itemsstorage = ScraperMainTask(urls, "GPU")
     count = len(itemsstorage)
-    ScraperDelete("gpu")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `gpu`(`Cooling`, `NumberOfFans`, `SemiPassive`, `FactoryOverclocked`, `GraphicsProcessor`, `LowProfile`, `NonreferenceCooler`, `PCIExpressVersion`, `Displayport`, `NumberOfDisplayportoutputs`, `DVI`, `NumberOfDVIOutputs`, `HDMI`, `NumberOfHdmiOutputs`, `VGAOutputs`, `MaximumResolution`, `NumberOfSupportedMonitors`, `Length`, `NumberOfSlots`, `DirectX`, `HDR`, `OpenGL`, `Vulkan`, `SupportForMultipleGraphicsCards`, `MemoryBandwidth`, `MemoryCapacity`, `MemoryInterface`, `MemorySpeed`, `MemoryType`, `GPUBoost`, `ProcessorSpeed`, `SupplementaryPowerConnector`, `ManufacturerWarranty`, `ReleaseYear`, `ProductPage`, `GPURating`, `CompID`) VALUES ('%s' ,'%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', 999999, '%s')""" % ( itemsstorage[item].setdefault('Cooling', default), itemsstorage[item].setdefault('Numberoffans', default), itemsstorage[item].setdefault('Semi-passive', default), itemsstorage[item].setdefault('Factoryoverclocked', default), itemsstorage[item].setdefault('Graphicsprocessor', default), itemsstorage[item].setdefault('Lowprofile', default), itemsstorage[item].setdefault('Non-referencecooler', default), itemsstorage[item].setdefault('PCIExpressversion', default), itemsstorage[item].setdefault('DisplayPort', default),  itemsstorage[item].setdefault('NumberofDisplayPortoutputs', default), itemsstorage[item].setdefault('DVI', default), itemsstorage[item].setdefault('NumberofDVIoutputs', default), itemsstorage[item].setdefault('HDMI', default), itemsstorage[item].setdefault('NumberofHDMIoutputs', default), itemsstorage[item].setdefault('VGAoutputs', default), itemsstorage[item].setdefault('Maximumresolution', default), itemsstorage[item].setdefault('Numberofsupportedmonitors', default), itemsstorage[item].setdefault('Length', default), itemsstorage[item].setdefault('Numberofslots', default), itemsstorage[item].setdefault('DirectX', default), itemsstorage[item].setdefault('HDR', default), itemsstorage[item].setdefault('OpenGL', default), itemsstorage[item].setdefault('Vulkan', default), itemsstorage[item].setdefault('Supportformultiplegraphicscards', default), itemsstorage[item].setdefault('Memorybandwidth', default), itemsstorage[item].setdefault('Memorycapacity', default), itemsstorage[item].setdefault('Memoryinterface', default), itemsstorage[item].setdefault('Memoryspeed', default), itemsstorage[item].setdefault('Memorytype', default), itemsstorage[item].setdefault('GPUBoost', default), itemsstorage[item].setdefault('Processorspeed', default), itemsstorage[item].setdefault('Supplementarypowerconnector', default), itemsstorage[item].setdefault('Manufacturerwarranty', default), itemsstorage[item].setdefault('Releaseyear', default), itemsstorage[item].setdefault('Productpage', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `GPU`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
     passmarkurl = "https://www.videocardbenchmark.net/gpu_list.php"
     passmarkregex = r'(gpu[\d]*)'
@@ -236,10 +259,10 @@ def RAM():
     urls = ["https://pricespy.co.nz/category.php?m=s321420922", "https://pricespy.co.nz/category.php?m=s321421236"]
     itemsstorage = ScraperMainTask(urls, "RAM")
     count = len(itemsstorage)
-    ScraperDelete("memory")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `memory`(`NumberOfModules`, `MemorySpeed`, `MemoryCapacity`, `ECC`, `ReleaseYear`, `PricePerGigabyte`, `ManufacturerWarranty`, `MemoryCapacityPerModule`, `CASLatency`, `TypeOfMemory`, `ProductPage`, `Voltage`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Numberofmodules', default), itemsstorage[item].setdefault('Memoryspeed', default), itemsstorage[item].setdefault('Memorycapacity', default), itemsstorage[item].setdefault('ECC', default), itemsstorage[item].setdefault('Releaseyear', default), itemsstorage[item].setdefault('Price/GB', default), itemsstorage[item].setdefault('Manufacturerwarranty', default), itemsstorage[item].setdefault('Memorycapacitypermodule', default), itemsstorage[item].setdefault('CASLatency', default), itemsstorage[item].setdefault('Typeofmemory', default), itemsstorage[item].setdefault('Productpage', default), itemsstorage[item].setdefault('Voltage', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `Memory`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
 def MOBO():
@@ -247,10 +270,10 @@ def MOBO():
     urls = ["https://pricespy.co.nz/category.php?m=s321421551"]
     itemsstorage = ScraperMainTask(urls, "MOBO")
     count = len(itemsstorage)
-    ScraperDelete("motherboard")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `motherboard`(`Width`, `Cooling`, `FormFactor`, `PCISlots`, `NumberOfHdmiOutputs`, `EthernetConnection`, `Socket`, `HDMI`, `HeadPhoneOutput`, `TypeOfMemory`, `USB2`, `mSATA`, `Bluetooth`, `ECCSupport`, `PCIExpressx8`, `TypeOfRaid`, `PCIExpressx1`, `PCIExpressx4`, `ManufacturerWarranty`, `PCIExpressVersion`, `SoundCard`, `PCIExpressx16`, `MemorySpeeds`, `ProductPage`, `ChassisFanConnectors`, `PCIExpressMini`, `BluetoothVersion`, `MemorySlots`, `MiniPCI`, `DVI`, `SupportForMultipleGraphicsCards`, `SupportForIIntegratedGraphicsInCPU`, `SATAExpress`, `MicrophoneInput`, `NumberOfEthernetConnections`, `PowerFanConnector`, `NumberOfDisplayportOutputs`, `Chipset`, `SATA3Gbs`, `MaximumAmountOfMemory`, `Displayport`, `USB`, `SoundCardChip`, `RaidController`, `Thunderbolt`, `64bitProcessor`, `U2`, `Depth`, `ReleaseYear`, `M2`, `VGAOutputs`, `WirelessNetwork`, `SATA6Gbs`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Width', default),  itemsstorage[item].setdefault('Cooling', default), itemsstorage[item].setdefault('Formfactor', default), itemsstorage[item].setdefault('PCIslots', default), itemsstorage[item].setdefault('NumberofHDMIoutputs', default), itemsstorage[item].setdefault('Ethernetconnection', default), itemsstorage[item].setdefault('Socket', default), itemsstorage[item].setdefault('HDMI', default), itemsstorage[item].setdefault('Headphoneoutput', default), itemsstorage[item].setdefault('Typeofmemory', default), itemsstorage[item].setdefault('USB2.0', default), itemsstorage[item].setdefault('mSATA', default), itemsstorage[item].setdefault('Bluetooth', default), itemsstorage[item].setdefault('ECCsupport', default), itemsstorage[item].setdefault('PCIExpressx8', default), itemsstorage[item].setdefault('TypeofRAID', default), itemsstorage[item].setdefault('PCIExpressx1', default), itemsstorage[item].setdefault('PCIExpressx4', default), itemsstorage[item].setdefault('Manufacturerwarranty', default), itemsstorage[item].setdefault('PCIExpressversion', default), itemsstorage[item].setdefault('Soundcard', default), itemsstorage[item].setdefault('PCIExpressx16', default), itemsstorage[item].setdefault('Memoryspeeds', default), itemsstorage[item].setdefault('Productpage', default), itemsstorage[item].setdefault('Chassisfanconnectors', default), itemsstorage[item].setdefault('PCIExpressMini', default), itemsstorage[item].setdefault('Bluetoothversion', default), itemsstorage[item].setdefault('Memoryslots', default), itemsstorage[item].setdefault('Mini-PCI', default), itemsstorage[item].setdefault('DVI', default), itemsstorage[item].setdefault('Supportformultiplegraphicscards', default), itemsstorage[item].setdefault('SupportforintegratedgraphicsinCPU', default), itemsstorage[item].setdefault('SATAExpress', default), itemsstorage[item].setdefault('Microphoneinput', default), itemsstorage[item].setdefault('NumberofEthernetconnections', default), itemsstorage[item].setdefault('Powerfanconnector', default), itemsstorage[item].setdefault('NumberofDisplayPortoutputs', default), itemsstorage[item].setdefault('Chipset', default), itemsstorage[item].setdefault('SATA3Gb/s', default), itemsstorage[item].setdefault('Maximumamountofmemory', default), itemsstorage[item].setdefault('DisplayPort', default), itemsstorage[item].setdefault('USB', default), itemsstorage[item].setdefault('Soundcardchip', default), itemsstorage[item].setdefault('RAIDcontroller', default), itemsstorage[item].setdefault('Thunderbolt', default), itemsstorage[item].setdefault('64-bitprocessor', default), itemsstorage[item].setdefault('U.2', default), itemsstorage[item].setdefault('Depth', default), itemsstorage[item].setdefault('Releaseyear', default), itemsstorage[item].setdefault('M.2', default),  itemsstorage[item].setdefault('VGAoutputs', default), itemsstorage[item].setdefault('Wirelessnetwork', default), itemsstorage[item].setdefault('SATA6Gb/s', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `MotherBoard`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
 def PSU():
@@ -258,10 +281,10 @@ def PSU():
     urls = ["https://pricespy.co.nz/category.php?m=s321422467"]
     itemsstorage = ScraperMainTask(urls, "PSU")
     count = len(itemsstorage)
-    ScraperDelete("psu")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `psu`(`Capacity`, `ReleaseYear`, `FanSize`, `Modular`, `CableSocks`, `PowerConnectorsForSata`, `PowerConnectionsForPciExpress`, `TemperatureControlledFan`, `ManufacturerWarranty`, `ProductPage`, `Efficiency`, `NumberOfFans`, `Semipassive`, `Format`, `80PlusCertification`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Capacity', default), itemsstorage[item].setdefault('Releaseyear', default) ,itemsstorage[item].setdefault('Fansize', default) ,itemsstorage[item].setdefault('Modular', default) ,itemsstorage[item].setdefault('Cablesocks', default) ,itemsstorage[item].setdefault('PowerconnectorsforSATA', default) ,itemsstorage[item].setdefault('PowerconnectionsforPCI-Express', default) ,itemsstorage[item].setdefault('Temperature-controlledfan', default) ,itemsstorage[item].setdefault('Manufacturerwarranty', default) ,itemsstorage[item].setdefault('Productpage', default) ,itemsstorage[item].setdefault('Efficiency', default) ,itemsstorage[item].setdefault('Numberoffans', default) ,itemsstorage[item].setdefault('Semi-passive', default) ,itemsstorage[item].setdefault('Format', default) ,itemsstorage[item].setdefault('80-pluscertification', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `PSU`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
 def SSD():
@@ -269,10 +292,10 @@ def SSD():
     urls = ["https://pricespy.co.nz/category.php?m=s321751548"]
     itemsstorage = ScraperMainTask(urls, "SSD")
     count = len(itemsstorage)
-    ScraperDelete("ssd")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `ssd`(`MaximumReadSpeed`, `ControllerChip`, `PricePerGigabyte`, `ManufacturerWarranty`, `Interface`, `FormFactor`, `TypeOfFlashMemory`, `Connection`, `ProductPage`, `Weight`, `MaximumWriteSpeed`, `Size`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Maximumreadspeed', default), itemsstorage[item].setdefault('Controllerchip', default) ,itemsstorage[item].setdefault('Price/GB', default) ,itemsstorage[item].setdefault('Manufacturerwarranty', default) ,itemsstorage[item].setdefault('Interface', default) ,itemsstorage[item].setdefault('Formfactor', default) ,itemsstorage[item].setdefault('Typeofflashmemory', default) ,itemsstorage[item].setdefault('Connection', default) ,itemsstorage[item].setdefault('Productpage', default) ,itemsstorage[item].setdefault('Weight', default) ,itemsstorage[item].setdefault('Maximumwritespeed', default) ,itemsstorage[item].setdefault('Size', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `SSD`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
 def HDD():
@@ -280,10 +303,10 @@ def HDD():
     urls = ["https://pricespy.co.nz/category.php?m=s321423383"]
     itemsstorage = ScraperMainTask(urls, "HDD")
     count = len(itemsstorage)
-    ScraperDelete("hdd")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `hdd`(`InternalTransferRate`, `ProductPage`, `HybridDisk`, `PriceperTeraByte`, `FormFactor`, `ManufacturerWarranty`, `Interface`, `CacheSize`, `Connection`, `ReleaseYear`, `RotationalSpeed`, `NoiseLevel`, `HardDriveSize`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Internaltransferrate', default), itemsstorage[item].setdefault('Productpage', default),itemsstorage[item].setdefault('Hybriddisk', default),itemsstorage[item].setdefault('Price/TB', default),itemsstorage[item].setdefault('Formfactor', default),itemsstorage[item].setdefault('Manufacturerwarranty', default),itemsstorage[item].setdefault('Interface', default),itemsstorage[item].setdefault('Cachesize', default),itemsstorage[item].setdefault('Connection', default),itemsstorage[item].setdefault('Releaseyear', default),itemsstorage[item].setdefault('Rotationalspeed', default),itemsstorage[item].setdefault('Noiselevel', default),itemsstorage[item].setdefault('Harddrivesize', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `HDD`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
 def CASE():
@@ -291,20 +314,33 @@ def CASE():
     urls = ["https://pricespy.co.nz/category.php?m=s321751584"]
     itemsstorage = ScraperMainTask(urls, "CASE")
     count = len(itemsstorage)
-    ScraperDelete("systemcase")
     for item in itemsstorage:
         count = count - 1
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['ItemID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `systemcase`(`TypeOfChassis`, `Material`, `Dimensions`, `ProductPage`, `NumberOfCardSlots`, `35DriveBays`, `ScrewlessDesign`, `Format`, `PositionOfThePowerSupply`, `Volume`, `SupportedMotherboards`, `Colour`, `RoomForExpansion`, `ReleaseYear`, `MaximumLengthOfVideoCard`, `HeightOfExpansionSlots`, `ActiveCooling`, `525DriveBays`, `Weight`, `WaterCooling`, `FanSpacesTotal`, `MaximumMotherboardSize`, `25DriveBays`, `MaxCPUCoolerHeight`, `BuiltInWatercooling`, `FrontConnections`, `CompID`) VALUES ( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')""" % ( itemsstorage[item].setdefault('Typeofchassis', default), itemsstorage[item].setdefault('Material', default), itemsstorage[item].setdefault('Dimensions', default), itemsstorage[item].setdefault('Productpage', default), itemsstorage[item].setdefault('Numberofcardslots', default), itemsstorage[item].setdefault('3.5drivebays', default), itemsstorage[item].setdefault('Screwlessdesign', default), itemsstorage[item].setdefault('Format', default), itemsstorage[item].setdefault('Positionofthepowersupply', default), itemsstorage[item].setdefault('Volume', default), itemsstorage[item].setdefault('Supportedmotherboards', default), itemsstorage[item].setdefault('Colour', default), itemsstorage[item].setdefault('Roomforexpansion', default), itemsstorage[item].setdefault('Releaseyear', default), itemsstorage[item].setdefault('Maximumlengthofvideocard', default), itemsstorage[item].setdefault('Heightofexpansionslots', default), itemsstorage[item].setdefault('Activecooling', default), itemsstorage[item].setdefault('5.25drivebays', default), itemsstorage[item].setdefault('Weight', default), itemsstorage[item].setdefault('Watercooling', default), itemsstorage[item].setdefault('Fanspacestotal', default), itemsstorage[item].setdefault('Maximummotherboardsize', default), itemsstorage[item].setdefault('2.5drivebays', default), itemsstorage[item].setdefault('MaxCPUcoolerheight', default), itemsstorage[item].setdefault('Built-inwatercooling', default), itemsstorage[item].setdefault('Frontconnections', default), itemsstorage[item]['ItemID']))
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `SystemCase`({}) VALUES ({})""".format(feildsquery, detailsquery))
         print str(count) + " uploads to DB remaining"
 
-#\[value-[0-9]{1,}\]
-#def SPARE():
-#    urls = [""]
-#    itemsstorage = ScraperMainTask(urls, "")
-#    for item in itemsstorage:
-#        ScraperUpload ( itemsstorage, \
-#        "INSERT INTO component(CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s')" % (item, itemsstorage[item]['Price'], itemsstorage[item]['Link']), \
-#        " VALUES (, '%s')" % ( itemsstorage[item].setdefault('Numberofmodules', default), )
+def ODD():
+    print "Starting ODD scrap"
+    urls = ["https://pricespy.co.nz/category.php?m=s321944433"]
+    itemsstorage = ScraperMainTask(urls, "ODD")
+    count = len(itemsstorage)
+    for item in itemsstorage:
+        count = count - 1
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `ODD`({}) VALUES ({})""".format(feildsquery, detailsquery))
+        print str(count) + " uploads to DB remaining"
+
+def AirCooler():
+    print "Starting AirCooler scrap"
+    urls = ["https://pricespy.co.nz/category.php?m=s321944431"]
+    itemsstorage = ScraperMainTask(urls, "AirCooler")
+    count = len(itemsstorage)
+    for item in itemsstorage:
+        count = count - 1
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `AirCooler`({}) VALUES ({})""".format(feildsquery, detailsquery))
+        print str(count) + " uploads to DB remaining"
 
 
 CPU()
@@ -315,5 +351,8 @@ PSU()
 SSD()
 HDD()
 CASE()
+ODD()
+#AirCooler()
+RemoveLegacyItems()
 
 print "All tasks completed"

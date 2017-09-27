@@ -56,9 +56,9 @@
                                     if ($key != "Alts") {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if($detail != "0" && $key == "ProductPage"){
+                                        if($detail != "" && $key == "ProductPage"){
                                             echo "<b>" . $KeyName . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
-                                        }elseif ($detail != "0" && !preg_match("/Comp/",$key)) {
+                                        }elseif ($detail != "" && !preg_match("/Comp/",$key)) {
                                             echo "<b>" . $KeyName . ": </b> " . $detail . "<br />";
                                         }
                                     }
@@ -73,15 +73,15 @@
                             <?php
                             foreach ($BuildItem['Alts'] as $AltArray) {
                                 if ($BuildItem['CompName'] != $AltArray['CompName']) {
-                                    echo "<div class='Alts'>";
+                                    echo "<div class='alts'>";
                                     echo "<b>Name:</b> <u><a href=https://pricespy.co.nz/product.php?j=" . $BuildItem['CompID'] . "," . $AltArray['CompID'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
                                     echo "<b>Price:</b> $" . $AltArray['CompPrice'] . "<br />";
                                     foreach ($AltArray as $key => $value) {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if ($value != "0" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
+                                        if ($value != "" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
                                             echo "<div style='color:#b2b2b2;'><b>" . $KeyName . ": </b> " . $value . "<br /></div>";
-                                        }elseif ($value != "0" && !preg_match("/Comp/",$key)) {
+                                        }elseif ($value != "" && !preg_match("/Comp/",$key)) {
                                             echo "<b>" . $KeyName . ": </b> " . $value . "<br />";
                                         }
                                     }

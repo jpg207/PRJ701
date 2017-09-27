@@ -38,6 +38,10 @@
         $('.price-container').click(function(e) {
             $('.price').toggleClass('clicked');
         });
+
+        $('input[type=radio]').change(function(){
+            $('form').submit();
+       });
     });
     </script>
 </head>

@@ -10,4 +10,3 @@
     <input id="option-two" type="radio" name="GraphicsCard" value="No" required>
     No
 </label>
-<button type="submit" value="Submit" class="pure-button pure-button-primary">Submit</button>

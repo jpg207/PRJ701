@@ -5,7 +5,7 @@
     class Model
     {
         public $pages = array('Home'=> '../Content/Home.php', 'Generate'=> '../Content/Generate.php', 'Learn'=> '../Content/Learn.php', 'Contact'=> '../Content/Contact.php');
-        public $questions = array('Budget'=> '../Questions/Budget.php', 'UserType'=> '../Questions/UserType.php', 'WiFi'=> '../Questions/WiFi.php', 'FormFactor'=> '../Questions/FormFactor.php', 'Programs'=> '../Questions/Programs.php', 'LocalStorage'=> '../Questions/LocalStorage.php', 'GraphicsCard'=> '../Questions/GraphicsCard.php', 'GeneratedBuild'=> '../Questions/GeneratedBuild.php');
+        public $questions = array('Budget'=> '../Questions/Budget.php', 'UserType'=> '../Questions/UserType.php', 'WiFi'=> '../Questions/WiFi.php', 'FormFactor'=> '../Questions/FormFactor.php', 'Programs'=> '../Questions/Programs.php', 'LocalStorage'=> '../Questions/LocalStorage.php', 'GraphicsCard'=> '../Questions/GraphicsCard.php', 'OpticalDrive'=> '../Questions/OpticalDrive.php', 'GeneratedBuild'=> '../Questions/GeneratedBuild.php');
 
         public function getPageContent()
         {
@@ -31,7 +31,9 @@
                     return $this->questions['LocalStorage'];
                 } elseif (isset($_SESSION['UserAnswers']['LocalStorage']) && !isset($_SESSION['UserAnswers']['GraphicsCard'])) {
                     return $this->questions['GraphicsCard'];
-                } elseif (isset($_SESSION['UserAnswers']['GraphicsCard'])) {
+                } elseif (isset($_SESSION['UserAnswers']['GraphicsCard'])&& !isset($_SESSION['UserAnswers']['OpticalDrive'])) {
+                    return $this->questions['OpticalDrive'];
+                } elseif (isset($_SESSION['UserAnswers']['OpticalDrive'])) {
                     return $this->questions['GeneratedBuild'];
                 } else {
                     return $this->questions['Budget'];
@@ -65,49 +67,49 @@
             $DBQueriesSuggestions = new DBQueriesSuggestions();
             try {
                 $Build['Case'] = $DBQueriesGenerate->DBGetCase($ComponentBudget['Case'], $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
-                $Build['Case']['Alts'] = $DBQueriesSuggestions->DBGetCaseAlt($ComponentBudget['Case'], $Build['Case']['TypeOfChassis']);
+                #$Build['Case']['Alts'] = $DBQueriesSuggestions->DBGetCaseAlt($ComponentBudget['Case'], $Build['Case']['TypeOfChassis']);
 
                 if (isset($Build['Case']['CompName']) && $Build['Case']['CompName'] != "") {
                     $supportedMOBOFormats = explode(',', $Build['Case']['SupportedMotherboards']);//Explodes the string of supported motherboard formats of the case by "," into an array
                     $Build['MOBO'] = $DBQueriesGenerate->DBGetMOBO($ComponentBudget['MOBO'], $supportedMOBOFormats, $Choices['WiFi']);//Gets a CPU based on the budget, CPU Socket and Supported motherboard formats of the case and stores it as part of the current build
-                    $Build['MOBO']['Alts'] = $DBQueriesSuggestions->DBGetMOBOAlt($ComponentBudget['MOBO'], $supportedMOBOFormats, $Choices['WiFi']);
+                    #$Build['MOBO']['Alts'] = $DBQueriesSuggestions->DBGetMOBOAlt($ComponentBudget['MOBO'], $supportedMOBOFormats, $Choices['WiFi']);
                 }else {
                     throw new Exception ("Could not find a case that fit your budget and formfactor, midi towers tend to have the best mix of compatibility and price");
                 }
 
                 if (isset($Build['MOBO']['CompName']) && $Build['MOBO']['CompName'] != "") {
                     $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU'], $Build['MOBO']['Socket']);//Gets a CPU based on the budget and stores it as part of the current build
-                    $Build['CPU']['Alts'] = $DBQueriesSuggestions->DBGetCPUAlt($ComponentBudget['CPU'], $Build['MOBO']['Socket'], $Build['CPU']['CPURating']);
+                    #$Build['CPU']['Alts'] = $DBQueriesSuggestions->DBGetCPUAlt($ComponentBudget['CPU'], $Build['MOBO']['Socket'], $Build['CPU']['CPURating']);
                 }else {
                     throw new Exception("Could not find a motherboard that fit your requirements");
                 }
 
                 $Build['GPU'] = $DBQueriesGenerate->DBGetGPU($ComponentBudget['GPU'], $Build['Case']['MaximumLengthOfVideoCard']);//Gets a GPU based on the budget and stores it as part of the current build
-                $Build['GPU']['Alts'] = $DBQueriesSuggestions->DBGetGPUAlt($ComponentBudget['GPU'], $Build['GPU']['GPURating'], $Build['Case']['MaximumLengthOfVideoCard']);
+                #$Build['GPU']['Alts'] = $DBQueriesSuggestions->DBGetGPUAlt($ComponentBudget['GPU'], $Build['GPU']['GPURating'], $Build['Case']['MaximumLengthOfVideoCard']);
 
                 $Build['RAM'] = $DBQueriesGenerate->DBGetRAM($ComponentBudget['RAM'], $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots']);//Gets RAM based on the budget and stores it as part of the current build
-                $Build['RAM']['Alts'] = $DBQueriesSuggestions->DBGetRAMAlt($ComponentBudget['RAM'], $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots'], $Build['RAM']['MemoryCapacity']);
+                #$Build['RAM']['Alts'] = $DBQueriesSuggestions->DBGetRAMAlt($ComponentBudget['RAM'], $Build['MOBO']['TypeOfMemory'], $Build['MOBO']['MemorySlots'], $Build['RAM']['MemoryCapacity']);
 
                 //Depeneding on wether the user picked SSD only, HDD only or Mixed storage, they will be got based on the budget and added to the current build
                 if($Choices['LocalStorage'] == "SSD"){
                     $Build['SSD'] = $DBQueriesGenerate->DBGetSSD($ComponentBudget['Storage']);
-                    $Build['SSD']['Alts'] = $DBQueriesSuggestions->DBGetSSDAlt($ComponentBudget['Storage'], $Build['SSD']['Size']);
+                    #$Build['SSD']['Alts'] = $DBQueriesSuggestions->DBGetSSDAlt($ComponentBudget['Storage'], $Build['SSD']['Size']);
                 }elseif ($Choices['LocalStorage'] == "HDD") {
                     $Build['HDD'] = $DBQueriesGenerate->DBGetHDD($ComponentBudget['Storage']);
-                    $Build['HDD']['Alts'] = $DBQueriesSuggestions->DBGetHDDAlt($ComponentBudget['Storage'], $Build['HDD']['HardDriveSize']);
+                    #$Build['HDD']['Alts'] = $DBQueriesSuggestions->DBGetHDDAlt($ComponentBudget['Storage'], $Build['HDD']['HardDriveSize']);
                 }else {
                     //If Mixed is picked, the budget is split based on the higher cost of SSD's
                     $ComponentBudget['SSD'] = (65/100) * $ComponentBudget['Storage'];
                     $Build['SSD'] = $DBQueriesGenerate->DBGetSSD($ComponentBudget['SSD']);
-                    $Build['SSD']['Alts'] = $DBQueriesSuggestions->DBGetSSDAlt($ComponentBudget['SSD'], $Build['SSD']['Size']);
+                    #$Build['SSD']['Alts'] = $DBQueriesSuggestions->DBGetSSDAlt($ComponentBudget['SSD'], $Build['SSD']['Size']);
 
                     $ComponentBudget['HDD'] = (35/100) * $ComponentBudget['Storage'];
                     $Build['HDD'] = $DBQueriesGenerate->DBGetHDD($ComponentBudget['HDD']);
-                    $Build['HDD']['Alts'] = $DBQueriesSuggestions->DBGetHDDAlt($ComponentBudget['Storage'], $Build['HDD']['HardDriveSize']);
+                    #$Build['HDD']['Alts'] = $DBQueriesSuggestions->DBGetHDDAlt($ComponentBudget['Storage'], $Build['HDD']['HardDriveSize']);
                 }
 
                 $Build['PSU'] = $DBQueriesGenerate->DBGetPSU($ComponentBudget['PSU']);//Gets a PSU based on the budget and stores it as part of the current build
-                $Build['PSU']['Alts'] = $DBQueriesSuggestions->DBGetPSUAlt($ComponentBudget['PSU']);
+                #$Build['PSU']['Alts'] = $DBQueriesSuggestions->DBGetPSUAlt($ComponentBudget['PSU']);
 
                 $Build['ComponentBudget'] = $ComponentBudget;
             } catch (Exception $e) {

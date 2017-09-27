@@ -73,7 +73,7 @@ def CPU():
     url = "https://www.cpubenchmark.net/cpu_list.php"
     mainregex = r'(cpu[\d]*)'
     print "Starting CPU scrap"
-    itemsstorage = ScraperMainTask(url, "CPU", mainregex)
+    itemsstorage = ScraperPassMarkTask(url, "CPU", mainregex)
     count = len(itemsstorage)
     for item in itemsstorage:
         ScraperUpload("""UPDATE cpu INNER JOIN component ON cpu.CompID = component.CompID SET CPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
@@ -84,7 +84,7 @@ def GPU():
     url = "https://www.videocardbenchmark.net/gpu_list.php"
     mainregex = r'(gpu[\d]*)'
     print "Starting GPU scrap"
-    itemsstorage = ScraperMainTask(url, "GPU", mainregex)
+    itemsstorage = ScraperPassMarkTask(url, "GPU", mainregex)
     count = len(itemsstorage)
     for item in itemsstorage:
         ScraperUpload("""UPDATE gpu INNER JOIN component ON gpu.CompID = component.CompID SET GPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))

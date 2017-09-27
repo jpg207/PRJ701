@@ -18,4 +18,3 @@
     <input id="option-four" type="radio" name="FormFactor" value="Mini tower" required>
     Mini tower
 </label>
-<button type="submit" value="Submit" class="pure-button pure-button-primary">Submit</button>

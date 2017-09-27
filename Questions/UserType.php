@@ -14,4 +14,3 @@
     <input id="option-three" type="radio" name="UserType" value="Artist/Renderer" required>
     Artist/Renderer
 </label>
-<button type="submit" value="Submit" class="pure-button pure-button-primary">Submit</button>

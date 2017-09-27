@@ -310,7 +310,7 @@ a.pure-button-primary {
     text-align: center;
 }
 
-.Alts{
+.alts{
     border-top: 3px dotted white;
     text-align: left;
     word-wrap: break-word;
@@ -341,7 +341,7 @@ a.pure-button-primary {
 }
 
 .expand_icon {
-    width: 15px;
+    width: 20px;
     cursor: pointer;
     cursor: hand;
 }

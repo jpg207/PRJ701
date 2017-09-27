@@ -14,4 +14,3 @@
     <input id="option-three" type="radio" name="LocalStorage" value="Mixed" required>
     Mixed set of both storage types
 </label>
-<button type="submit" value="Submit" class="pure-button pure-button-primary">Submit</button>
