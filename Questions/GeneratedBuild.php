@@ -14,7 +14,7 @@
 <img class="attentionimage" src="../Images/Attention.png" alt="">
 <h3>Sorry about this</h3>
 <p>
-    We cannot create a build for you, this is normally due to budget constrants, try increasing your budget
+    <?php echo $CurrentBuild ?>
 </p>
 
 <?php } ?>
@@ -56,7 +56,7 @@
                                     if ($key != "Alts") {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if($detail != "" && $key == "ProductPage"){
+                                        if(strpos($detail, 'http') === 0){
                                             echo "<b>" . $KeyName . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
                                         }elseif ($detail != "" && !preg_match("/Comp/",$key)) {
                                             echo "<b>" . $KeyName . ": </b> " . $detail . "<br />";
@@ -79,7 +79,9 @@
                                     foreach ($AltArray as $key => $value) {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if ($value != "" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
+                                        if(strpos($value, 'http') === 0){
+                                            echo "<b>" . $KeyName . ": </b> <u><a href=" . $value . " target='_blank'>Click to Vist</a></u><br />";
+                                        }elseif ($value != "" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
                                             echo "<div style='color:#b2b2b2;'><b>" . $KeyName . ": </b> " . $value . "<br /></div>";
                                         }elseif ($value != "" && !preg_match("/Comp/",$key)) {
                                             echo "<b>" . $KeyName . ": </b> " . $value . "<br />";

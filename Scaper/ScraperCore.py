@@ -23,7 +23,7 @@ def PrintResults(itemsstorage):
     for item in itemsstorage:
         print  item
         for itemdet in itemsstorage[item]:
-            print "        " + itemdet #+ "  D:  " + str(itemsstorage[item][itemdet])
+            print "        " + itemdet + "  D:  " + str(itemsstorage[item][itemdet])
         print "\n ++++++++++++++++++++++++ \n"
 
 def ScraperMainTask(urls, id):
@@ -84,6 +84,8 @@ def ScraperMainTask(urls, id):
             productcost = re.sub(removecomma, '', productcost)
             products = soup.find_all("tr", class_="erow") #Get all product details
             for product in products: #Loop through all product details
+                for br in product.find_all('br'):
+                    br.replace_with(", ")
                 product = product.get_text() #Get detail text
                 #Remove unwanted information from text
                 product = product.replace("Suggest change - Beta","")
@@ -121,6 +123,14 @@ def ScraperMainTask(urls, id):
             PrintException()
     #PrintResults(itemsstorage)
     return itemsstorage
+
+def CategoryScrape(urls, Name):
+    itemsstorage = ScraperMainTask(urls, Name)
+    count = len(itemsstorage)
+    print "Uploading to DB"
+    for item in itemsstorage:
+        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
+        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `{}`({}) VALUES ({})""".format(Name, feildsquery, detailsquery))
 
 def ScraperCreateStatement(itemsstorage, item):
     feildsquery = ""
@@ -169,11 +179,18 @@ def RemoveLegacyItems():
        print "MySQL failiure: " + str(e)
        db.rollback()
 
-def ScraperPassMarkTask(passmarkurl, id, passmarkregex):
+def PassmarkCatergoryScrape(passmarkurl, name):
+    itemsstorage = ScraperPassMarkTask(passmarkurl, name)
+    count = len(itemsstorage)
+    for item in itemsstorage:
+        ScraperUploadPassMark("""UPDATE {0} INNER JOIN component ON {0}.CompID = component.CompID SET {0}Rating = {1} WHERE component.CompName LIKE '{2}'""".format(name, itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
+
+def ScraperPassMarkTask(passmarkurl, id):
     itemsstorage = {}
     dualregex = r'(Dual)'
     removeat = r'@.*'
     removedash = r'-'
+    passmarkregex = r'([\w]{3}[\d]*)'
 
     try:
         htmltext = urllib.urlopen(passmarkurl).read()#Reads the URL and saves its text
@@ -199,10 +216,9 @@ def ScraperPassMarkTask(passmarkurl, id, passmarkregex):
                 column += 1
             if ItemRow['Price'] != "NA":
                 itemsstorage[ItemRow["Name"]] = ItemRow
-            break
     except Exception:
         PrintException()
-    PrintResults(itemsstorage)
+    #PrintResults(itemsstorage)
     return itemsstorage
 
 def ScraperUploadPassMark(DetailsUpload):
@@ -219,128 +235,70 @@ def ScraperUploadPassMark(DetailsUpload):
 def CPU():
     print "Starting CPU scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321418940"]
-    itemsstorage = ScraperMainTask(urls, "CPU")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']), """REPLACE  INTO `CPU`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "CPU")
+
     passmarkurl = "https://www.cpubenchmark.net/cpu_list.php"
-    passmarkregex = r'(cpu[\d]*)'
-    print "Starting CPU rank scrap"
-    itemsstorage = ScraperPassMarkTask(passmarkurl, "CPU", passmarkregex)
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        ScraperUploadPassMark("""UPDATE cpu INNER JOIN component ON cpu.CompID = component.CompID SET CPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
-    print "CPU uploads complete"
+    print "Completing CPU rank scrap"
+    PassmarkCatergoryScrape(passmarkurl, "CPU")
 
 def GPU():
     print "Starting GPU scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321383620"]
-    itemsstorage = ScraperMainTask(urls, "GPU")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `GPU`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "GPU")
+
     passmarkurl = "https://www.videocardbenchmark.net/gpu_list.php"
-    passmarkregex = r'(gpu[\d]*)'
-    print "Starting GPU rank scrap"
-    itemsstorage = ScraperPassMarkTask(passmarkurl, "GPU", passmarkregex)
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        ScraperUploadPassMark("""UPDATE gpu INNER JOIN component ON gpu.CompID = component.CompID SET GPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
-    print "GPU uploads complete"
+    print "Completing GPU rank scrap"
+    PassmarkCatergoryScrape(passmarkurl, "GPU")
 
 def RAM():
     print "Starting RAM scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321420922", "https://pricespy.co.nz/category.php?m=s321421236"]
-    itemsstorage = ScraperMainTask(urls, "RAM")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `Memory`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "Memory")
 
 def MOBO():
     print "Starting MOBO scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321421551"]
-    itemsstorage = ScraperMainTask(urls, "MOBO")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `MotherBoard`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "MotherBoard")
 
 def PSU():
     print "Starting PSU scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321422467"]
-    itemsstorage = ScraperMainTask(urls, "PSU")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `PSU`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "PSU")
 
 def SSD():
     print "Starting SSD scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321751548"]
-    itemsstorage = ScraperMainTask(urls, "SSD")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `SSD`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "SSD")
 
 def HDD():
     print "Starting HDD scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321423383"]
-    itemsstorage = ScraperMainTask(urls, "HDD")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `HDD`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "HDD")
 
 def CASE():
     print "Starting CASE scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321751584"]
-    itemsstorage = ScraperMainTask(urls, "CASE")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `SystemCase`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "SystemCase")
 
 def ODD():
     print "Starting ODD scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321944433"]
-    itemsstorage = ScraperMainTask(urls, "ODD")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `ODD`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "ODD")
 
 def AirCooler():
     print "Starting AirCooler scrap"
     urls = ["https://pricespy.co.nz/category.php?m=s321944431"]
-    itemsstorage = ScraperMainTask(urls, "AirCooler")
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        count = count - 1
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `AirCooler`({}) VALUES ({})""".format(feildsquery, detailsquery))
-        print str(count) + " uploads to DB remaining"
+    CategoryScrape(urls, "AirCooler")
+
+def WaterCooler():
+    print "Starting WaterCooler scrap"
+    urls = ["https://pricespy.co.nz/category.php?m=s321944430"]
+    CategoryScrape(urls, "WaterCooler")
+
+def WIFI():
+    print "Starting Wireless Adapters scrap"
+    urls = ["https://pricespy.co.nz/category.php?m=s321951218"]
+    CategoryScrape(urls, "WirelessAdapters")
 
 
 CPU()
@@ -352,7 +310,9 @@ SSD()
 HDD()
 CASE()
 ODD()
-#AirCooler()
+AirCooler()
+WaterCooler()
+WIFI()
 RemoveLegacyItems()
 
 print "All tasks completed"

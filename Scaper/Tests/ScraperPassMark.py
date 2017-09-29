@@ -23,16 +23,17 @@ def PrintResults(itemsstorage):
             print "        " + itemdet + "  D:  " + itemsstorage[item][itemdet]
         print "\n ++++++++++++++++++++++++ \n"
 
-def ScraperPassMarkTask(url, id, mainregex):
+def ScraperPassMarkTask(url, id):
     itemsstorage = {}
     dualregex = r'(Dual)'
     removeat = r'@.*'
     removedash = r'-'
+    passmarkregex = r'([\w]{3}[\d]*)'
 
     try:
         htmltext = urllib.urlopen(url).read()#Reads the URL and saves its text
         soup = BeautifulSoup(htmltext, "lxml")# Sets up BeautifulSoup
-        for row in soup.find_all('tr', id=re.compile(mainregex)):
+        for row in soup.find_all('tr', id=re.compile(passmarkregex)):
             column = 1
             ItemRow = {}
             for cell in row.find_all('td'):
@@ -71,9 +72,8 @@ def ScraperUpload(DetailsUpload):
 
 def CPU():
     url = "https://www.cpubenchmark.net/cpu_list.php"
-    mainregex = r'(cpu[\d]*)'
     print "Starting CPU scrap"
-    itemsstorage = ScraperPassMarkTask(url, "CPU", mainregex)
+    itemsstorage = ScraperPassMarkTask(url, "CPU")
     count = len(itemsstorage)
     for item in itemsstorage:
         ScraperUpload("""UPDATE cpu INNER JOIN component ON cpu.CompID = component.CompID SET CPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
@@ -82,9 +82,8 @@ def CPU():
 
 def GPU():
     url = "https://www.videocardbenchmark.net/gpu_list.php"
-    mainregex = r'(gpu[\d]*)'
     print "Starting GPU scrap"
-    itemsstorage = ScraperPassMarkTask(url, "GPU", mainregex)
+    itemsstorage = ScraperPassMarkTask(url, "GPU")
     count = len(itemsstorage)
     for item in itemsstorage:
         ScraperUpload("""UPDATE gpu INNER JOIN component ON gpu.CompID = component.CompID SET GPURating= %s WHERE component.CompName LIKE '%s'""" % (itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))

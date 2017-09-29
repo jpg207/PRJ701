@@ -467,6 +467,51 @@
             RotationalSpeed INT(8),
             ActiveCooling VARCHAR(200),
             Socket VARCHAR(200),
+            No  VARCHAR(200),
+            FanSupportforpassivecooler VARCHAR(200),
+            Lightsource VARCHAR(200),
+            Colour VARCHAR(200),
+            FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);
+        ");
+
+        $sql->query("CREATE TABLE WirelessAdapter(
+            CompID INT (10)PRIMARY KEY NOT NULL,
+            StandardsFollowed VARCHAR(200),
+            DetachableAntenna VARCHAR(200),
+            TotalDataTransferRate INT(8),
+            Bluetoothversion DECIMAL(8,2),
+            DataLinkLayer VARCHAR(200),
+            Manual VARCHAR(200),
+            24GHz VARCHAR(200),
+            Bluetooth VARCHAR(200),
+            Connection VARCHAR(200),
+            ProductPage VARCHAR(200),
+            ExternalAntenna VARCHAR(200),
+            WirelessAecurity VARCHAR(200),
+            DataTransferrate INT(8),
+            WakeOnLAN VARCHAR(200),
+            5GHz VARCHAR(200),
+            Wirelesssecurity VARCHAR(200),
+            FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);
+        ");
+
+        $sql->query("CREATE TABLE WaterCooler(
+            CompID INT (10)PRIMARY KEY NOT NULL,
+            Socket VARCHAR(200),
+            Waterblockincluded VARCHAR(200),
+            Airflow INT(8),
+            Placement VARCHAR(200),
+            Dimensions VARCHAR(200),
+            Weight INT(8),
+            No VARCHAR(200),
+            Noiselevel VARCHAR(200),
+            Manual VARCHAR(200),
+            Lightingeffects VARCHAR(200),
+            Fansize INT(8),
+            Productpage VARCHAR(200),
+            Rotationalspeed INT(8),
+            Activecooling VARCHAR(200),
+            Features VARCHAR(200),
             FOREIGN KEY (CompID) REFERENCES Component(CompID) ON DELETE CASCADE);
         ");
 

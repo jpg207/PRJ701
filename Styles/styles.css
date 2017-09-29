@@ -181,7 +181,7 @@ a.pure-button-primary {
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin: 2em 0 1em;
+    margin: 0.5em 0 0.6em;
 }
 
 .content-head-ribbon {
@@ -215,29 +215,18 @@ a.pure-button-primary {
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+.side-menu-container{
+    width: 100%;
+}
+
 .side-menu {
     background-color: #2d3e50;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
-    padding: 10px 10px 10px 0px;
-    min-height: 180px;
-    width: 100%;
+    padding: 2px 10px 10px 0px;
 }
 
 .side-menu h3{
-    color: #ddd;
-    margin: 5px;
-}
-
-.side-menu2 {
-    background-color: #2d3e50;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    padding: 10px 10px 10px 0px;
-    width: 100%;
-}
-
-.side-menu2 h3{
     color: #ddd;
     margin: 5px;
 }
@@ -254,6 +243,11 @@ a.pure-button-primary {
     -webkit-transition: .5s;
     width: 100%;
     color: #C2C1C1;
+}
+
+.decision-history p{
+    margin: 0px;
+    margin-left: 5px;
 }
 
 .decision-history:hover {
@@ -368,7 +362,7 @@ a.pure-button-primary {
 }
 
 .price-container{
-    padding: 5px;
+    padding-left: 5px;
     cursor: pointer;
     cursor: hand;
 }
@@ -444,17 +438,13 @@ a.pure-button-primary {
     }
 
     .side-menu{
-        position: fixed;
-        width: 20%;
-        float: left;
-        max-width: 300px;
+        margin-bottom: 5px;
     }
 
-    .side-menu2{
-        position: fixed;
-        width: 20%;
-        float: left;
+    .side-menu-container{
         max-width: 300px;
-        top: 550px;
+        width: 20%;
+        position: fixed;
+        float: left;
     }
 }

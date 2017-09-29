@@ -53,7 +53,7 @@
         }
 
 
-        public function DBGetMOBOAlt($MOBOBudget, $supportedMOBOFormats, $WIFI){
+        public function DBGetMOBOAlt($MOBOBudget, $supportedMOBOFormats){
             $alts = array();
             $Budgets = $this->Budget($MOBOBudget);
             unset($MOBOFormatsQuery);
@@ -65,14 +65,9 @@
                     $MOBOFormatsQuery = "motherboard.Formfactor = '$Format'";
                 }
             }
-            unset($WIFIQuery);
-            if($WIFI == "Yes"){
-                $WIFIQuery = " AND motherboard.WirelessNetwork = 'Yes'";
-            }else{
-                $WIFIQuery = "";
-            }
+
             foreach ($Budgets as $Budget) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `FormFactor`, `EthernetConnection`, `Bluetooth`, `PCIExpressx16`, `MemorySlots`, `Chipset`, `MaximumAmountOfMemory`, `WirelessNetwork`, `M2`, `SATA6Gbs` FROM component INNER JOIN motherboard ON component.CompID = motherboard.CompID WHERE component.CompPrice <= $Budget AND (" . $MOBOFormatsQuery . ")" . $WIFIQuery . " ORDER BY component.CompPrice DESC LIMIT 1", $alts);
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `FormFactor`, `EthernetConnection`, `Bluetooth`, `PCIExpressx16`, `MemorySlots`, `Chipset`, `MaximumAmountOfMemory`, `WirelessNetwork`, `M2`, `SATA6Gbs` FROM component INNER JOIN motherboard ON component.CompID = motherboard.CompID WHERE component.CompPrice <= $Budget AND (" . $MOBOFormatsQuery . ") ORDER BY component.CompPrice DESC LIMIT 1", $alts);
             }
             return $alts;
         }
@@ -86,8 +81,8 @@
 
             $Loop = 0;
 
-            foreach ($symbols as $symbol) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `ClockFrequency`, `CPUType`, `BoxVersion`, `NumberOfThreads`, `Socket`, `NumberOfCores`, `ThermalDesignPower`, `IntegratedGraphics`, `CPURating` FROM component INNER JOIN cpu ON component.CompID = cpu.CompID WHERE  cpu.Socket = '$Socket' AND cpu.CPURating $symbol $Rating AND component.CompPrice <= $Budgets[$Loop] ORDER BY cpu.CPURating $Order[$Loop] LIMIT 1", $alts);
+            foreach ($Budgets as $Budget) {
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `ClockFrequency`, `CPUType`, `BoxVersion`, `NumberOfThreads`, `Socket`, `NumberOfCores`, `ThermalDesignPower`, `IntegratedGraphics`, `CPURating` FROM component INNER JOIN cpu ON component.CompID = cpu.CompID WHERE  cpu.Socket = '$Socket' AND cpu.CPURating $symbols[$Loop] $Rating AND component.CompPrice <= $Budget ORDER BY cpu.CPURating $Order[$Loop] LIMIT 1", $alts);
                 $Loop += 1;
             }
             return $alts;
@@ -99,8 +94,8 @@
             $symbols = $this->Symbol();
             $Order = $this->Order();
             $Loop = 0;
-            foreach ($symbols as $symbol) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `Cooling`, `NumberOfFans`, `GraphicsProcessor`, `MaximumResolution`, `Length`, `NumberOfSlots`, `MemoryBandwidth`, `MemoryCapacity`, `MemoryInterface`, `MemorySpeed`, `MemoryType`, `GPUBoost`, `ProcessorSpeed` , `GPURating` FROM component INNER JOIN gpu ON component.CompID = gpu.CompID WHERE gpu.GPURating $symbol $Rating AND component.CompPrice <= $Budgets[$Loop] AND gpu.Length <= $Length ORDER BY gpu.GPURating $Order[$Loop] LIMIT 1", $alts);
+            foreach ($Budgets as $Budget) {
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `Cooling`, `NumberOfFans`, `GraphicsProcessor`, `MaximumResolution`, `Length`, `NumberOfSlots`, `MemoryBandwidth`, `MemoryCapacity`, `MemoryInterface`, `MemorySpeed`, `MemoryType`, `GPUBoost`, `ProcessorSpeed` , `GPURating` FROM component INNER JOIN gpu ON component.CompID = gpu.CompID WHERE gpu.GPURating $symbols[$Loop] $Rating AND component.CompPrice <= $Budget AND gpu.Length <= $Length ORDER BY gpu.GPURating $Order[$Loop] LIMIT 1", $alts);
                 $Loop += 1;
             }
             return $alts;
@@ -114,8 +109,8 @@
 
             $Loop = 0;
 
-            foreach ($symbols as $symbol) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `NumberOfModules`, `MemorySpeed`, `MemoryCapacity`, `ECC`, `ReleaseYear`, `PricePerGigabyte`, `ManufacturerWarranty`, `MemoryCapacityPerModule`, `CASLatency`, `TypeOfMemory`, `ProductPage`, `Voltage` FROM component INNER JOIN memory ON component.CompID = memory.CompID WHERE component.CompPrice <= $Budgets[$Loop] AND memory.TypeOfMemory = '$Typeofmemory' AND memory.NumberOfModules <= $Memoryslots AND memory.MemoryCapacity $symbol $Capacity ORDER BY memory.MemoryCapacity DESC, memory.PricePerGigabyte LIMIT 1", $alts);
+            foreach ($Budgets as $Budget) {
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `NumberOfModules`, `MemorySpeed`, `MemoryCapacity`, `ECC`, `ReleaseYear`, `PriceGB`, `ManufacturerWarranty`, `MemoryCapacityPerModule`, `CASLatency`, `TypeOfMemory`, `ProductPage`, `Voltage` FROM component INNER JOIN memory ON component.CompID = memory.CompID WHERE component.CompPrice <= $Budget AND memory.TypeOfMemory = '$Typeofmemory' AND memory.NumberOfModules <= $Memoryslots AND memory.MemoryCapacity $symbols[$Loop] $Capacity ORDER BY memory.MemoryCapacity DESC, memory.PriceGB LIMIT 1", $alts);
                 $Loop += 1;
             }
             return $alts;
@@ -126,8 +121,8 @@
             $Budgets = $this->Budget($HDDBudget);
             $symbols = $this->Symbol();
             $Loop = 0;
-            foreach ($symbols as $symbol) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `HybridDisk`, `PriceperTeraByte`, `FormFactor`, `Interface`, `CacheSize`, `Connection`, `RotationalSpeed`, `HardDriveSize` FROM component INNER JOIN hdd ON component.CompID = hdd.CompID WHERE component.CompPrice <= $Budgets[$Loop] AND hdd.HardDriveSize $symbol $Capacity ORDER BY hdd.Harddrivesize DESC LIMIT 1", $alts);
+            foreach ($Budgets as $Budget) {
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `HybridDisk`, `PriceTB`, `FormFactor`, `Interface`, `CacheSize`, `Connection`, `RotationalSpeed`, `HardDriveSize` FROM component INNER JOIN hdd ON component.CompID = hdd.CompID WHERE component.CompPrice <= $Budget AND hdd.HardDriveSize $symbols[$Loop] $Capacity ORDER BY hdd.Harddrivesize DESC LIMIT 1", $alts);
                 $Loop += 1;
             }
             return $alts;
@@ -138,8 +133,8 @@
             $Budgets = $this->Budget($SSDBudget);
             $symbols = $this->Symbol();
             $Loop = 0;
-            foreach ($symbols as $symbol) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`,  `MaximumReadSpeed`, `PricePerGigabyte`, `Interface`, `FormFactor`, `MaximumWriteSpeed`, `Size` FROM component INNER JOIN ssd ON component.CompID = ssd.CompID WHERE component.CompPrice <= $Budgets[$Loop] AND ssd.Size $symbol $Capacity ORDER BY ssd.Size DESC LIMIT 1", $alts);
+            foreach ($Budgets as $Budget) {
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`,  `MaximumReadSpeed`, `PriceGB`, `Interface`, `FormFactor`, `MaximumWriteSpeed`, `Size` FROM component INNER JOIN ssd ON component.CompID = ssd.CompID WHERE component.CompPrice <= $Budget AND ssd.Size $symbols[$Loop] $Capacity ORDER BY ssd.Size DESC LIMIT 1", $alts);
                 $Loop += 1;
             }
             return $alts;
@@ -153,6 +148,5 @@
             }
             return $alts;
         }
-
     }
 ?>

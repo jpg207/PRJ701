@@ -6,10 +6,6 @@
     <input id="option-one" type="radio" name="FormFactor" value="Midi tower" required>
     Midi tower
 </label>
-<label for="option-two" class="pure-radio">
-    <input id="option-two" type="radio" name="FormFactor" value="Full tower/Server" required>
-    Full tower/Server
-</label>
 <label for="option-three" class="pure-radio">
     <input id="option-three" type="radio" name="FormFactor" value="Cube" required>
     Cube
