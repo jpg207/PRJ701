@@ -52,6 +52,7 @@
                             <div class="line">
                             </div>
                             <p class="item-details">
+
                                 <?php foreach($BuildItem as $key => $detail){
                                     if ($key != "Alts") {
                                         $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);

@@ -57,7 +57,7 @@
             }
 
             foreach ($ComponentBudget as &$Budget) {
-                $Budget = (110/100) * $Budget;
+                $Budget = (105/100) * $Budget;
             }
 
             if ($Choices['GraphicsCard'] == "No") {
@@ -73,6 +73,7 @@
             $DBQueriesSuggestions = new DBQueriesSuggestions();
             try {
                 $Build['Case'] = $DBQueriesGenerate->DBGetCase($ComponentBudget['Case'], $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
+                print_r($Build['Case']);
                 $Build['Case']['Alts'] = $DBQueriesSuggestions->DBGetCaseAlt($ComponentBudget['Case'], $Build['Case']['TypeOfChassis']);
 
                 if (isset($Build['Case']['CompName']) && $Build['Case']['CompName'] != "") {
