@@ -39,7 +39,7 @@ def ScraperMainTask(urls, id):
     linkregex = re.compile(r'Product Page')
     removebrackets = r'\([^)]*\)'
     removecomma = r","
-    removeapostrophe = r"'"
+    removefullstop = r"\."
     removedash = r"-"
     idsort = r"\d+$"
     pageregex = r'^https://pricespy\.co\.nz\/category\.php\?[a-zA-Z]=[A-Za-z0-9]{1,}&s=[0-9]{1,}$'
@@ -92,17 +92,18 @@ def ScraperMainTask(urls, id):
 
                 product = re.sub(cutregex , "", product)
                 if not linkregex.search(product):
-                    product = product.replace("->", "")
-                    product = re.sub(removeapostrophe, '', product)
+                    #product = product.replace("->", "")
+                    product = product.replace("\'", "")
                     product = re.sub(removebrackets, '', product)
                     product = re.sub(removedash, '', product)
                 #if (re.match(matchGB, product)):
                 #    product = re.sub(removeGB, '', product)
                 #product = re.sub(removecomma, '', product)
+                product = re.sub(removefullstop, '', product)
                 product = product.strip()
                 product = re.search(detailregex, product) #Split product detail and detail title
                 if product:
-                    productdetail = product.group(1).replace(" ", "")
+                    productdetail = product.group(1).strip()
                     productdetailvalue = product.group(2).strip()
                     if productdetailvalue == "Contribute": #Null detail if only value is Contribute
                         productdetailvalue = "NULL"
@@ -129,63 +130,57 @@ def CategoryScrape(urls, Name):
     count = len(itemsstorage)
     print "Uploading to DB"
     for item in itemsstorage:
-        feildsquery, detailsquery = ScraperCreateStatement(itemsstorage, item)
-        ScraperUpload ("""REPLACE  INTO component(CompID, CompName, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], item, itemsstorage[item]['Price'], itemsstorage[item]['Link']),  """REPLACE  INTO `{}`({}) VALUES ({})""".format(Name, feildsquery, detailsquery))
+        detailsquery = ""
 
-def ScraperCreateStatement(itemsstorage, item):
-    feildsquery = ""
-    detailsquery = ""
-    for detail in itemsstorage[item]:
-        if detail != "Link" and detail != "Price"  and detail != "NULL":
-            processeddetail = re.sub(r'[^a-zA-Z0-9]', '', detail)
-            if feildsquery == "":
-                try:
-                    feildsquery = "`" + processeddetail + "`"
-                    detailsquery = "'" + str(itemsstorage[item][detail]) + "'"
-                except Exception as e:
-                    print "Nothing"
-                detailsquery = "'" + str(itemsstorage[item][detail]) + "'"
-            else:
-                try:
-                    feildsquery = feildsquery + ", `" + processeddetail + "`"
-                    detailsquery = detailsquery + ", '" + str(itemsstorage[item][detail])  + "'"
-                except Exception as e:
-                    print "Nothing"
-    return feildsquery, detailsquery
+        db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
+        cursor = db.cursor()
+        processeditem = re.sub(r"'", '', item)
+        cursor.execute("""REPLACE  INTO componentidentifyer(CompID, CompName, CompCategory, CompPrice, CompLink) VALUES ('%s', '%s', '%s', '%s', '%s')""" % (itemsstorage[item]['CompID'], processeditem, Name, itemsstorage[item]['Price'], itemsstorage[item]['Link']))
+        cursor.execute("""DELETE FROM `componentdetail` WHERE `CompID` = {}""".format(itemsstorage[item]['CompID']))
+        db.commit()
 
-def ScraperUpload(ComponentUpload, DetailsUpload):
-    db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
-    cursor = db.cursor()
-    try:
-        #print ComponentUpload
-        cursor.execute(ComponentUpload)
-        db.commit()
-        #print DetailsUpload
-        cursor.execute(DetailsUpload)
-        db.commit()
-    except MySQLdb.Error, e:
-       # Rollback in case there is any error
-       print "MySQL failiure: " + str(e)
-       db.rollback()
+        for detail in itemsstorage[item]:
+            if detail != "Link" and detail != "Price" and detail != "CompID" and detail != "NULL":
+                try:
+                    processeddetail = re.sub(r',', '', itemsstorage[item][detail])
+                except Exception:
+                    processeddetail = "0"
+
+                if not processeddetail[0].isdigit():
+                    processeddetail = 0
+
+                if detailsquery == "":
+                    detailsquery = "(" + itemsstorage[item]['CompID'] + ", '" + detail + "', '" + str(itemsstorage[item][detail]) + "', '" + str(processeddetail) + "')"
+                else:
+                    detailsquery = detailsquery +", (" + itemsstorage[item]['CompID'] + ", '" + detail + "', '" + str(itemsstorage[item][detail]) + "', '" + str(processeddetail) + "')"
+        db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
+        cursor = db.cursor()
+        try:
+            #print """INSERT  INTO `componentdetail`(`CompID`, `DetailTitle`, `DetailValue`, `DetailValueNumeric`) VALUES {}""".format(detailsquery)
+            query = """INSERT  INTO `componentdetail`(`CompID`, `DetailTitle`, `DetailValue`, `DetailValueNumeric`) VALUES {}""".format(detailsquery)
+            cursor.execute(query)
+            db.commit()
+        except MySQLdb.Error, e:
+           # Rollback in case there is any error
+           print "MySQL failiure: " + str(e)
+           print query
+           db.rollback()
+
 
 def RemoveLegacyItems():
     try:
         db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
         cursor = db.cursor()
-        cursor.execute("""DELETE FROM component WHERE CompDate < NOW() - INTERVAL 1 DAY""")
+        query = """DELETE FROM componentidentifyer WHERE CompDate < NOW() - INTERVAL 1 DAY"""
+        cursor.execute(query)
         print "Legacy data has been cleared!!"
     except MySQLdb.Error, e:
        # Rollback in case there is any error
        print "MySQL failiure: " + str(e)
+       print query
        db.rollback()
 
-def PassmarkCatergoryScrape(passmarkurl, name):
-    itemsstorage = ScraperPassMarkTask(passmarkurl, name)
-    count = len(itemsstorage)
-    for item in itemsstorage:
-        ScraperUploadPassMark("""UPDATE {0} INNER JOIN component ON {0}.CompID = component.CompID SET {0}Rating = {1} WHERE component.CompName LIKE '{2}'""".format(name, itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%"))
-
-def ScraperPassMarkTask(passmarkurl, id):
+def PassmarkCatergoryScrape(passmarkurl, id):
     itemsstorage = {}
     dualregex = r'(Dual)'
     removeat = r'@.*'
@@ -219,18 +214,20 @@ def ScraperPassMarkTask(passmarkurl, id):
     except Exception:
         PrintException()
     #PrintResults(itemsstorage)
-    return itemsstorage
 
-def ScraperUploadPassMark(DetailsUpload):
-    db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
-    cursor = db.cursor()
-    try:
-        cursor.execute(DetailsUpload)
-        db.commit()
-    except MySQLdb.Error, e:
-       # Rollback in case there is any error
-       print "MySQL failiure: " + str(e)
-       db.rollback()
+    count = len(itemsstorage)
+    for item in itemsstorage:
+        db = MySQLdb.connect("localhost", "root","","compcreator", charset="utf8")
+        cursor = db.cursor()
+        try:
+            query = """UPDATE componentidentifyer SET CompRating = {} WHERE componentidentifyer.CompName LIKE '{}'""".format(itemsstorage[item]["Rank"], "%" + itemsstorage[item]["Name"] + "%")
+            cursor.execute(query)
+            db.commit()
+        except MySQLdb.Error, e:
+           # Rollback in case there is any error
+           print "MySQL failiure: " + str(e)
+           print query
+           db.rollback()
 
 def CPU():
     print "Starting CPU scrap"
