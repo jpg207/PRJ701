@@ -67,20 +67,30 @@
                             Core differences are listed bellow
                             <p class="item-details">
                             <?php
+                            $Path = array("Upgrade path", "Downgrade path");
+                            $count = 0;
                             foreach ($BuildItem['ComponentDetailAlts'] as $AltArray) {
                                 if ($BuildItem['CompName'] != $AltArray['CompName']) {
+                                    $CompairDetail = 0;
                                     echo "<div class='alts'>";
+                                    echo "<b>" . $Path[$count] . "</b><br />";
                                     echo "<b>Name:</b> <u><a href=https://pricespy.co.nz/product.php?j=" . $BuildItem['CompID'] . "," . $AltArray['CompID'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
                                     echo "<b>Price:</b> $" . $AltArray['CompPrice'] . "<br />";
                                     foreach ($AltArray['AltDetails'] as $key => $value) {
+                                        if (isset($BuildItem['ComponentDetail'][$value['DetailTitle']]['DetailValue'])) {
+                                            $CompairDetail = $BuildItem['ComponentDetail'][$value['DetailTitle']]['DetailValue'];
+                                        }
                                         if(strpos($value['DetailValue'], 'http') === 0){
                                             echo "<b>" . $value['DetailTitle'] . ": </b> <u><a href=" . $value['DetailValue'] . " target='_blank'>Click to Vist</a></u><br />";
-                                        }elseif ($value['DetailValue'] != "NULL" && !preg_match("/Comp/",$value['DetailTitle']) && $BuildItem['ComponentDetail'][$value['DetailTitle']]['DetailValue'] != $value['DetailValue'] ) {
+                                        }elseif (!preg_match("/Comp/",$value['DetailTitle']) && $CompairDetail != $value['DetailValue']) {
                                             echo "<b>" . $value['DetailTitle'] . ": </b> " . $value['DetailValue'] . "<br />";
                                         }
                                     }
                                     echo "<br /></div>";
+                                }else {
+                                    echo "<b>No " . $Path[$count] . " component</b> <br /> The system has already selected the recommended " . $Path[$count] . " component as the primary component";
                                 }
+                                $count++;
                             }
                             ?>
                             </p>

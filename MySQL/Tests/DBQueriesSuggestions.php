@@ -47,7 +47,7 @@
             $alts = array();
             $Budgets = $this->Budget($CASEBudget);
             foreach ($Budgets as $Budget) {
-                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `TypeOfChassis`, `Material`, `Dimensions`, `35DriveBays`, `Format`, `Volume`, `SupportedMotherboards`, `Colour`, `RoomForExpansion`, `Weight`, `25DriveBays`, `MaxCPUCoolerHeight` FROM component INNER JOIN systemcase ON component.CompID = systemcase.CompID WHERE component.CompPrice <= $Budget AND systemcase.TypeOfChassis = '$FormFactor' AND NOT systemcase.SupportedMotherboards = '0' ORDER BY component.CompPrice DESC LIMIT 1", $alts);
+                $this->GetAlts("SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, `TypeOfChassis`, `Material`, `Dimensions`, `35DriveBays`, `Format`, `Volume`, `SupportedMotherboards`, `Colour`, `RoomForExpansion`, `Weight`, `25DriveBays`, `MaxCPUCoolerHeight` FROM component INNER JOIN systemcase ON component.CompID = systemcase.CompID WHERE component.CompPrice <= $Budget AND systemcase.TypeOfChassis = '$FormFactor' AND systemcase.SupportedMotherboards != '0' ORDER BY component.CompPrice DESC LIMIT 1", $alts);
             }
             return $alts;
         }

@@ -42,14 +42,13 @@ def ScraperMainTask(urls, id):
     removefullstop = r"\."
     removedash = r"-"
     idsort = r"\d+$"
-    pageregex = r'^https://pricespy\.co\.nz\/category\.php\?[a-zA-Z]=[A-Za-z0-9]{1,}&s=[0-9]{1,}$'
-
-    count = 0
+    pageregex = r'^https://pricespy\.co\.nz\/category\.php\?m=' + urls[0] + '&s=[0-9]{1,}$'
+    for key, url in enumerate(urls):
+        urls[key] = "https://pricespy.co.nz/category.php?m=" + urls[0]
     while urls: #Cycles through each URL passed in
         try:
             htmltext = urllib.urlopen(urls[0]).read()#Reads the URL and saves its text
             soup = BeautifulSoup(htmltext, "lxml")# Sets up BeautifulSoup
-            count += 1
             urls.pop(0)#Removes current url from list of URLs pased in
             for tag in soup.find_all('a', href=True):#Finds any link in on the current page with a active link
                 link = base + tag['href']#Merges the base URL with the one from the link
@@ -99,7 +98,7 @@ def ScraperMainTask(urls, id):
                 #if (re.match(matchGB, product)):
                 #    product = re.sub(removeGB, '', product)
                 #product = re.sub(removecomma, '', product)
-                product = re.sub(removefullstop, '', product)
+                product = re.sub(removefullstop, ',', product)
                 product = product.strip()
                 product = re.search(detailregex, product) #Split product detail and detail title
                 if product:
@@ -110,7 +109,8 @@ def ScraperMainTask(urls, id):
                     else:
                         #Add all details to the dictionary
                         productdetailvalue = productdetailvalue.encode('utf-8')
-                    itemsdetails[productdetail] = productdetailvalue
+                    if productdetailvalue != "NULL":
+                        itemsdetails[productdetail] = productdetailvalue
             itemsdetails["Link"] = link.encode('utf-8')
             CompID = re.search(idsort, itemsdetails["Link"])
             itemsdetails["CompID"] = CompID.group()
@@ -140,7 +140,7 @@ def CategoryScrape(urls, Name):
         db.commit()
 
         for detail in itemsstorage[item]:
-            if detail != "Link" and detail != "Price" and detail != "CompID" and detail != "NULL":
+            if detail != "Link" and detail != "Price" and detail != "CompID" and detail != "NULL" and itemsstorage[item][detail] != "NULL":
                 try:
                     processeddetail = re.sub(r',', '', itemsstorage[item][detail])
                 except Exception:
@@ -231,7 +231,7 @@ def PassmarkCatergoryScrape(passmarkurl, id):
 
 def CPU():
     print "Starting CPU scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321418940"]
+    urls = ["s321418940"]
     CategoryScrape(urls, "CPU")
 
     passmarkurl = "https://www.cpubenchmark.net/cpu_list.php"
@@ -240,7 +240,7 @@ def CPU():
 
 def GPU():
     print "Starting GPU scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321383620"]
+    urls = ["s321383620"]
     CategoryScrape(urls, "GPU")
 
     passmarkurl = "https://www.videocardbenchmark.net/gpu_list.php"
@@ -249,52 +249,52 @@ def GPU():
 
 def RAM():
     print "Starting RAM scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321420922", "https://pricespy.co.nz/category.php?m=s321421236"]
+    urls = ["s321420922", "s321421236"]
     CategoryScrape(urls, "Memory")
 
 def MOBO():
     print "Starting MOBO scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321421551"]
+    urls = ["s321421551"]
     CategoryScrape(urls, "MotherBoard")
 
 def PSU():
     print "Starting PSU scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321422467"]
+    urls = ["s321422467"]
     CategoryScrape(urls, "PSU")
 
 def SSD():
     print "Starting SSD scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321751548"]
+    urls = ["s321751548"]
     CategoryScrape(urls, "SSD")
 
 def HDD():
     print "Starting HDD scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321423383"]
+    urls = ["s321423383"]
     CategoryScrape(urls, "HDD")
 
 def CASE():
     print "Starting CASE scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321751584"]
+    urls = ["s321751584"]
     CategoryScrape(urls, "SystemCase")
 
 def ODD():
     print "Starting ODD scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321944433"]
+    urls = ["s321944433"]
     CategoryScrape(urls, "ODD")
 
 def AirCooler():
     print "Starting AirCooler scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321944431"]
+    urls = ["s321944431"]
     CategoryScrape(urls, "AirCooler")
 
 def WaterCooler():
     print "Starting WaterCooler scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321944430"]
+    urls = ["s321944430"]
     CategoryScrape(urls, "WaterCooler")
 
 def WIFI():
     print "Starting Wireless Adapters scrap"
-    urls = ["https://pricespy.co.nz/category.php?m=s321951218"]
+    urls = ["s321951218"]
     CategoryScrape(urls, "WirelessAdapters")
 
 
