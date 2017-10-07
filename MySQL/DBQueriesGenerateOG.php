@@ -9,8 +9,7 @@
         }
 
         public function GetItem($Name, $Budget, $Query){
-            $Query = "SELECT componentidentifyer.`CompID`, `CompName`, `CompPrice`, `CompLink`, componentdetail.* FROM componentidentifyer INNER JOIN componentdetail ON componentidentifyer.CompID = componentdetail.CompID WHERE componentidentifyer.CompPrice <= " . $Budget . " " . $Query;
-            print $Query;
+            $Query = "SELECT component.`CompID`, `CompName`, `CompPrice`, `CompLink`, " . $Name . ".* FROM component INNER JOIN " . $Name . " ON component.CompID = " . $Name . ".CompID WHERE component.CompPrice <= " . $Budget . " " . $Query;
             $rows = array();
             $sql = new DBConnection("compcreator");
             $result = $sql->query($Query);
@@ -27,7 +26,7 @@
         }
 
         public function DBGetCase($Budget, $FormFactor){
-            $rows = $this->GetItem("systemcase", $Budget, "AND (componentdetail.DetailTitle = 'TypeOfChassis' AND componentdetail.DetailValue = '$FormFactor') AND (componentdetail.DetailTitle = 'SupportedMotherboards' AND componentdetail.DetailValue != '0') AND (componentdetail.DetailTitle = 'MaximumLengthOfVideoCard' AND componentdetail.DetailValue != '0') AND (componentdetail.DetailTitle = 'MaxCPUCoolerHeight' AND componentdetail.DetailValue != '0') ORDER BY componentidentifyer.CompPrice DESC LIMIT 1");
+            $rows = $this->GetItem("systemcase", $Budget, "AND systemcase.TypeOfChassis = '$FormFactor' AND systemcase.SupportedMotherboards != '0' AND systemcase.MaximumLengthOfVideoCard != '0' AND systemcase.MaxCPUCoolerHeight != '0' ORDER BY component.CompPrice DESC LIMIT 1");
             return $rows;
         }
 
@@ -37,13 +36,13 @@
             foreach($supportedMOBOFormats as $Format){
                 $Format = ltrim($Format);
                 if (isset($MOBOFormatsQuery)){
-                    $MOBOFormatsQuery = $MOBOFormatsQuery . " OR componentdetail.FormFactor = '$Format'";
+                    $MOBOFormatsQuery = $MOBOFormatsQuery . " OR motherboard.FormFactor = '$Format'";
                 }else{
-                    $MOBOFormatsQuery = "componentdetail.FormFactor = '$Format'";
+                    $MOBOFormatsQuery = "motherboard.FormFactor = '$Format'";
                 }
             }
 
-            $rows = $this->GetItem("motherboard", $Budget, "AND (" . $MOBOFormatsQuery . ") ORDER BY componentidentifyer.CompPrice DESC LIMIT 1");
+            $rows = $this->GetItem("motherboard", $Budget, "AND (" . $MOBOFormatsQuery . ") ORDER BY component.CompPrice DESC LIMIT 1");
             array_push($collection, $rows);
             if ($WIFI == "Yes" && $rows['WirelessNetwork'] != "Yes") {
                 $Budget = (20/100) * $Budget;
@@ -54,12 +53,12 @@
         }
 
         public function DBGetCPU($Budget, $Socket){
-            $rows = $this->GetItem("cpu", $Budget, "AND componentdetail.Socket = '$Socket' ORDER BY componentdetail.CPURating ASC LIMIT 1");
+            $rows = $this->GetItem("cpu", $Budget, "AND cpu.Socket = '$Socket' ORDER BY cpu.CPURating ASC LIMIT 1");
             return $rows;
         }
 
         public function DBGetGPU($Budget, $Length){
-            $rows = $this->GetItem("gpu", $Budget, "AND componentdetail.Length <= $Length ORDER BY componentdetail.GPURating ASC LIMIT 1");
+            $rows = $this->GetItem("gpu", $Budget, "AND gpu.Length <= $Length ORDER BY gpu.GPURating ASC LIMIT 1");
             return $rows;
         }
 
@@ -74,27 +73,27 @@
         }
 
         public function DBGetRAM($Budget, $Typeofmemory, $Memoryslots){
-            $rows = $this->GetItem("memory", $Budget, "AND componentdetail.TypeOfMemory = '$Typeofmemory' AND componentdetail.NumberOfModules <= $Memoryslots ORDER BY componentdetail.MemoryCapacity DESC, componentdetail.PriceGB LIMIT 1");
+            $rows = $this->GetItem("memory", $Budget, "AND memory.TypeOfMemory = '$Typeofmemory' AND memory.NumberOfModules <= $Memoryslots ORDER BY memory.MemoryCapacity DESC, memory.PriceGB LIMIT 1");
             return $rows;
         }
 
         public function DBGetPSU($Budget){
-            $rows = $this->GetItem("psu", $Budget, "ORDER BY componentidentifyer.CompPrice DESC LIMIT 1");
+            $rows = $this->GetItem("psu", $Budget, "ORDER BY component.CompPrice DESC LIMIT 1");
             return $rows;
         }
 
         public function DBGetAir($Budget, $Socket){
-            $rows = $this->GetItem("aircooler", $Budget, "AND componentdetail.Socket LIKE '%" . $Socket . "%' ORDER BY componentidentifyer.CompPrice DESC LIMIT 1");
+            $rows = $this->GetItem("aircooler", $Budget, "AND aircooler.Socket LIKE '%" . $Socket . "%' ORDER BY component.CompPrice DESC LIMIT 1");
             return $rows;
         }
 
         public function DBGetWater($Budget, $Socket){
-            $rows = $this->GetItem("watercooler", $Budget, "AND componentdetail.Socket LIKE '%" . $Socket . "%' ORDER BY componentidentifyer.CompPrice DESC LIMIT 1");
+            $rows = $this->GetItem("watercooler", $Budget, "AND watercooler.Socket LIKE '%" . $Socket . "%' ORDER BY component.CompPrice DESC LIMIT 1");
             return $rows;
         }
 
         public function DBODD($Budget, $Type){
-            $rows = $this->GetItem("odd", $Budget, "AND " . $Type . " = 'Yes' ORDER BY componentidentifyer.CompPrice ASC LIMIT 1");
+            $rows = $this->GetItem("odd", $Budget, "AND " . $Type . " = 'Yes' ORDER BY component.CompPrice ASC LIMIT 1");
             return $rows;
         }
     }

@@ -52,16 +52,11 @@
                             <div class="line">
                             </div>
                             <p class="item-details">
-
-                                <?php foreach($BuildItem as $key => $detail){
-                                    if ($key != "Alts") {
-                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
-                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if(strpos($detail, 'http') === 0){
-                                            echo "<b>" . $KeyName . ": </b> <u><a href=" . $detail . " target='_blank'>Click to Vist</a></u><br />";
-                                        }elseif ($detail != "" && !preg_match("/Comp/",$key)) {
-                                            echo "<b>" . $KeyName . ": </b> " . $detail . "<br />";
-                                        }
+                                <?php foreach($BuildItem['ComponentDetail'] as $detail){
+                                    if(strpos($detail['DetailValue'], 'http') === 0){
+                                        echo "<b>" . $detail['DetailTitle'] . ": </b> <u><a href=" . $detail['DetailValue'] . " target='_blank'>Click to Vist</a></u><br />";
+                                    }elseif (!preg_match("/Comp/",$detail['DetailTitle'])) {
+                                        echo "<b>" . $detail['DetailTitle'] . ": </b> " . $detail['DetailValue'] . "<br />";
                                     }
                                 }?>
                             </p>
@@ -72,20 +67,16 @@
                             Core differences are listed bellow
                             <p class="item-details">
                             <?php
-                            foreach ($BuildItem['Alts'] as $AltArray) {
+                            foreach ($BuildItem['ComponentDetailAlts'] as $AltArray) {
                                 if ($BuildItem['CompName'] != $AltArray['CompName']) {
                                     echo "<div class='alts'>";
                                     echo "<b>Name:</b> <u><a href=https://pricespy.co.nz/product.php?j=" . $BuildItem['CompID'] . "," . $AltArray['CompID'] . " target='_blank'>" . $AltArray['CompName'] . "</a></u><br />";
                                     echo "<b>Price:</b> $" . $AltArray['CompPrice'] . "<br />";
-                                    foreach ($AltArray as $key => $value) {
-                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{1}[a-z]/', ' $0', $key);
-                                        $KeyName = preg_replace('/(?<!\ )[A-Z]{2,}/', ' $0', $KeyName);
-                                        if(strpos($value, 'http') === 0){
-                                            echo "<b>" . $KeyName . ": </b> <u><a href=" . $value . " target='_blank'>Click to Vist</a></u><br />";
-                                        }elseif ($value != "" && !preg_match("/Comp/",$key) && $BuildItem[$key] == $value) {
-                                            echo "<div style='color:#b2b2b2;'><b>" . $KeyName . ": </b> " . $value . "<br /></div>";
-                                        }elseif ($value != "" && !preg_match("/Comp/",$key)) {
-                                            echo "<b>" . $KeyName . ": </b> " . $value . "<br />";
+                                    foreach ($AltArray['AltDetails'] as $key => $value) {
+                                        if(strpos($value['DetailValue'], 'http') === 0){
+                                            echo "<b>" . $value['DetailTitle'] . ": </b> <u><a href=" . $value['DetailValue'] . " target='_blank'>Click to Vist</a></u><br />";
+                                        }elseif ($value['DetailValue'] != "NULL" && !preg_match("/Comp/",$value['DetailTitle']) && $BuildItem['ComponentDetail'][$value['DetailTitle']]['DetailValue'] != $value['DetailValue'] ) {
+                                            echo "<b>" . $value['DetailTitle'] . ": </b> " . $value['DetailValue'] . "<br />";
                                         }
                                     }
                                     echo "<br /></div>";
