@@ -9,5 +9,5 @@
     $_SESSION['Active'] = 'True';
     $UserAnswers = array();
     $_SESSION['UserAnswers'] = $UserAnswers;
-    header("Location: Controllers/controller.php")
+    header("Location: Controllers/Controller.php")
 ?>

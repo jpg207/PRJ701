@@ -57,21 +57,23 @@
                         break;
                     }
                 }
-                $ComponentDetail = array();
-                $Query = "SELECT `DetailTitle`, `DetailValue`, `DetailValueNumeric` FROM componentdetail  WHERE `CompID` = " . $ID;
-                $sql = new DBConnection("compcreator");
-                $Result = $sql->query($Query);
-                while ($Rows = mysqli_fetch_assoc($Result)) {
-                    $ComponentDetail[$Rows['DetailTitle']] = $Rows;
-                }
-                if (isset($ComponentDetail)) {
-                    if ($count == 0) {
-                        $Component['ComponentDetail'] = $ComponentDetail;
-                    } else {
-                        $Alt[$ID]['AltDetails'] = $ComponentDetail;
+                if (isset($ID)) {
+                    $ComponentDetail = array();
+                    $Query = "SELECT `DetailTitle`, `DetailValue`, `DetailValueNumeric` FROM componentdetail  WHERE `CompID` = " . $ID;
+                    $sql = new DBConnection("compcreator");
+                    $Result = $sql->query($Query);
+                    while ($Rows = mysqli_fetch_assoc($Result)) {
+                        $ComponentDetail[$Rows['DetailTitle']] = $Rows;
                     }
+                    if (isset($ComponentDetail)) {
+                        if ($count == 0) {
+                            $Component['ComponentDetail'] = $ComponentDetail;
+                        } else {
+                            $Alt[$ID]['AltDetails'] = $ComponentDetail;
+                        }
+                    }
+                    $count = $count + 1;
                 }
-                $count = $count + 1;
             }
             $Component['ComponentDetailAlts'] = $Alt;
             if (isset($Component['CompName']) && $Component['CompName'] != "") {

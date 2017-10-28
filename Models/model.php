@@ -43,6 +43,8 @@
         }
 
         public function processBuild(){
+            $warnings = array();
+            unset($_SESSION['Warnings']);
             $Build = array();//Array of current build
             $Choices = $_SESSION['UserAnswers'];//Loads user choices locally
             $budget = $Choices['Budget'];//Gets user budget
@@ -84,7 +86,7 @@
                 }else {
                     throw new Exception ("Could not find a case that fit your budget and formfactor, midi towers tend to have the best mix of compatibility and price");
                 }
-                
+
                 if (isset($Build['MotherBoard']['CompName']) && $Build['MotherBoard']['CompName'] != "") {
                     $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU'], $Build['MotherBoard']['ComponentDetail']['Socket']['DetailValue']); //Gets a CPU based on the budget and stores it as part of the current build
                 }else {
@@ -112,9 +114,14 @@
                 $Build['PSU'] = $DBQueriesGenerate->DBGetPSU($ComponentBudget['PSU']);//Gets a PSU based on the budget and stores it as part of the current build
 
                 preg_match("/([\d]{2,}|[\w]{2,}[\d].)/", $Build['MotherBoard']['ComponentDetail']['Socket']['DetailValue'], $Socket);
-                if ($Choices['Cooler'] == "Water" && $Build['Case']['WaterCooling'] == "Yes") {
+
+                if ($Choices['Cooler'] == "Water" && $Build['Case']['ComponentDetail']['Water cooling']['DetailValue'] == "Yes") {
                     $Build['CPUCooler'] = $DBQueriesGenerate->DBGetWater($ComponentBudget['CPUCooler'], $Socket[0]);
-                }elseif ($Choices['Cooler'] == "Air" || $Build['CPU']['BoxVersion'] == "without fan/cooler") {
+                    if ($Build['CPUCooler'] == null) {
+                        $Build['CPUCooler'] = $DBQueriesGenerate->DBGetAir($ComponentBudget['CPUCooler'], $Socket[0], $Build['Case']['ComponentDetail']['Max CPU cooler height']['DetailValue']);
+                        $warnings['WaterCooler'] = "WaterCooler could not be found, defaulting to air";
+                    }
+                }elseif ($Choices['Cooler'] == "Air" || $Build['CPU']['ComponentDetail']['Box version']['DetailValue'] == "without fan/cooler") {
                     if ($Choices['Cooler'] == "No") {
                         $ComponentBudget['CPUCooler'] = $ComponentBudget['CPUCooler'] / 2;
                     }
@@ -131,15 +138,7 @@
             } catch (Exception $e) {
                 $Build = $e;
             }
-
+            $_SESSION['Warnings']  = $warnings;
             return $Build;//Returns the current build back to the front end for display
-        }
-
-
-
-
-
-        public function temp(){
-
         }
     }

@@ -41,6 +41,7 @@ def ScraperMainTask(urls, id):
     removecomma = r","
     removefullstop = r"\."
     removedash = r"-"
+    regexurl = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     idsort = r"\d+$"
     pageregex = r'^https://pricespy\.co\.nz\/category\.php\?m=' + urls[0] + '&s=[0-9]{1,}$'
     for key, url in enumerate(urls):
@@ -91,14 +92,15 @@ def ScraperMainTask(urls, id):
 
                 product = re.sub(cutregex , "", product)
                 if not linkregex.search(product):
-                    #product = product.replace("->", "")
+                    product = product.replace("->", "")
                     product = product.replace("\'", "")
                     product = re.sub(removebrackets, '', product)
-                    product = re.sub(removedash, '', product)
+                    #product = re.sub(removedash, '', product)
+                if not re.findall(regexurl, product):
+                    product = re.sub(removefullstop, ',', product)
                 #if (re.match(matchGB, product)):
                 #    product = re.sub(removeGB, '', product)
                 #product = re.sub(removecomma, '', product)
-                product = re.sub(removefullstop, ',', product)
                 product = product.strip()
                 product = re.search(detailregex, product) #Split product detail and detail title
                 if product:

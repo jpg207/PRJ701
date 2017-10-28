@@ -14,7 +14,7 @@
             <div class="pure-u-1-1 pure-u-xl-1-4"></div>
             <div class="pure-u-1-1 pure-u-xl-5-8 decision-content">
                 <div class="decision-content-inner">
-                    <form class="pure-form" action="controller.php?page=Generate" method="post">
+                    <form class="pure-form" action="Controller.php?page=Generate" method="post">
                         <fieldset>
                                 <?php
                                 include ($CurrentQuestion);

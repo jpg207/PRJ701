@@ -8,7 +8,7 @@
           <fieldset>
             <legend>Got a problem, suggestion or just want to contact us? Hit us up bellow</legend>
             <label for="name">Name</label>
-            <input required type="text" name="name" placeholder="Email">
+            <input required type="text" name="name" placeholder="Name">
 
             <label for="email">Email</label>
             <input required id="email" type="email" placeholder="Email">

@@ -8,7 +8,12 @@
 <p>
     The following results are what we recommend for your system:
 </p>
-
+    <?php if ($_SESSION['Warnings'] != null):
+        echo "<h3>Warnings</h3>";
+        foreach ($_SESSION['Warnings'] as $key => $value) {
+            echo "<b>" . $key . ":</b> " . $value;
+        }
+    endif; ?>
 <?php }else{ ?>
 
 <img class="attentionimage" src="../Images/Attention.png" alt="">
@@ -64,7 +69,7 @@
 
                         <div class="learn-details">
                             <b>Other opitions:</b><br />
-                            Core differences are listed bellow
+                            Component differences are listed bellow
                             <p class="item-details">
                             <?php
                             $Path = array("Upgrade path", "Downgrade path");

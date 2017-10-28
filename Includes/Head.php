@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../Styles/purecss-grids.css">
     <link rel="stylesheet" href="../Styles/font-awesome.css">
 
-    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../Styles/Styles.css">
 
     <script src="../Scripts/jquery-min.js"></script>
     <script type="text/javascript">
