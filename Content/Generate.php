@@ -58,7 +58,7 @@
                             <div class="price">
                                 <?php foreach ($CurrentBuild as $key => $item) {
                                     if ($key != "ComponentBudget" && isset($CurrentBuild['ComponentBudget'][$key])) {
-                                        echo  "<b>" . $key . ":</b> $" . $item['CompPrice'] . "<br />";
+                                        echo  "<b>" . $key . ":</b> $" . $item['CompPrice']  . " out  of $" . round($CurrentBuild['ComponentBudget'][$key],  2) . "<br />";
                                     }
                                 } ?>
                             </div>

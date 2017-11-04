@@ -113,9 +113,9 @@
 
                 $Build['PSU'] = $DBQueriesGenerate->DBGetPSU($ComponentBudget['PSU']);//Gets a PSU based on the budget and stores it as part of the current build
 
-                preg_match("/([\d]{2,}|[\w]{2,}[\d].)/", $Build['MotherBoard']['ComponentDetail']['Socket']['DetailValue'], $Socket);
+                preg_match("/([\d]{2,}|[\w]{2,}[\d])/", $Build['MotherBoard']['ComponentDetail']['Socket']['DetailValue'], $Socket);
 
-                if ($Choices['Cooler'] == "Water" && $Build['Case']['ComponentDetail']['Water cooling']['DetailValue'] == "Yes") {
+                if ($Choices['Cooler'] == "Water" && isset($Build['Case']['ComponentDetail']['Water cooling']['DetailValue']) && $Build['Case']['ComponentDetail']['Water cooling']['DetailValue'] == "Yes") {
                     $Build['CPUCooler'] = $DBQueriesGenerate->DBGetWater($ComponentBudget['CPUCooler'], $Socket[0]);
                     if ($Build['CPUCooler'] == null) {
                         $Build['CPUCooler'] = $DBQueriesGenerate->DBGetAir($ComponentBudget['CPUCooler'], $Socket[0], $Build['Case']['ComponentDetail']['Max CPU cooler height']['DetailValue']);
@@ -136,7 +136,7 @@
 
                 $Build['ComponentBudget'] = $ComponentBudget;
             } catch (Exception $e) {
-                $Build = $e;
+                $Build = $e->getMessage();
             }
             $_SESSION['Warnings']  = $warnings;
             return $Build;//Returns the current build back to the front end for display

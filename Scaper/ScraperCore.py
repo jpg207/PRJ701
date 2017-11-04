@@ -96,16 +96,17 @@ def ScraperMainTask(urls, id):
                     product = product.replace("\'", "")
                     product = re.sub(removebrackets, '', product)
                     #product = re.sub(removedash, '', product)
-                if not re.findall(regexurl, product):
-                    product = re.sub(removefullstop, ',', product)
+                #if not re.findall(regexurl, product):
+                #    product = re.sub(removefullstop, ',', product)
                 #if (re.match(matchGB, product)):
                 #    product = re.sub(removeGB, '', product)
                 #product = re.sub(removecomma, '', product)
                 product = product.strip()
+                #print product
                 product = re.search(detailregex, product) #Split product detail and detail title
                 if product:
-                    productdetail = product.group(1).strip()
-                    productdetailvalue = product.group(2).strip()
+                    productdetail = product.group(1)
+                    productdetailvalue = product.group(2)
                     if productdetailvalue == "Contribute": #Null detail if only value is Contribute
                         productdetailvalue = "NULL"
                     else:

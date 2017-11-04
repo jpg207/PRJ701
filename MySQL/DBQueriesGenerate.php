@@ -29,6 +29,7 @@
                 $Item = array();
                 $Query = "SELECT DISTINCT componentidentifyer.* FROM componentidentifyer INNER JOIN componentdetail ON componentidentifyer.CompID = componentdetail.CompID WHERE componentidentifyer.CompPrice <= " . $Budget . " AND componentidentifyer.CompCategory = '" . $Name . "' " . $OrderBy ."";
                 $sql = new DBConnection("compcreator");
+                #print $Query . "<br /><br />";
                 $DetailResult = $sql->query($Query);
                 while ($Temp = mysqli_fetch_assoc($DetailResult)) {
                     array_push($Item, $Temp);
@@ -109,8 +110,8 @@
             array_push($collection, $rows);
             if ($WIFI == "Yes" && $rows['ComponentDetail']['Wireless network']['DetailValue'] != "Yes") {
                 $Budget = (20/100) * $Budget;
-                $QueryConditions = array("");
-                $wireless = $this->GetItem("WirelessAdapters", $Budget, $QueryConditions, "ORDER BY (componentdetail.DetailTitle = 'Total Data Transfer Rate'), componentdetail.DetailValueNumeric DESC");
+                $QueryConditions = array();
+                $wireless = $this->GetItem("WirelessAdapters", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Total Data Transfer Rate' ORDER BY componentdetail.DetailValueNumeric DESC");
                 array_push($collection, $wireless);
             }
             return $collection;
@@ -119,42 +120,42 @@
         public function DBGetCPU($Budget, $Socket)
         {
             $QueryConditions = array("componentdetail.DetailTitle = 'Socket' AND componentdetail.DetailValue = '$Socket'");
-            $rows = $this->GetItem("cpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC ");
+            $rows = $this->GetItem("cpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC");
             return $rows;
         }
 
         public function DBGetGPU($Budget, $Length)
         {
             $QueryConditions = array("componentdetail.DetailTitle = 'Length' AND componentdetail.DetailValueNumeric <= '$Length' ");
-            $rows = $this->GetItem("gpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC ");
+            $rows = $this->GetItem("gpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC");
             return $rows;
         }
 
         public function DBGetHDD($Budget)
         {
-            $QueryConditions = array("");
-            $rows = $this->GetItem("hdd", $Budget, $QueryConditions, "ORDER BY (componentdetail.DetailTitle = 'Hard drive size'), componentdetail.DetailValueNumeric DESC ");
+            $QueryConditions = array();
+            $rows = $this->GetItem("hdd", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Hard drive size' ORDER BY componentdetail.DetailValueNumeric DESC");
             return $rows;
         }
 
         public function DBGetSSD($Budget)
         {
-            $QueryConditions = array("");
-            $rows = $this->GetItem("ssd", $Budget, $QueryConditions, "ORDER BY (componentdetail.DetailTitle = 'Size'), componentdetail.DetailValueNumeric DESC ");
+            $QueryConditions = array();
+            $rows = $this->GetItem("ssd", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Size' ORDER BY componentdetail.DetailValueNumeric DESC");
             return $rows;
         }
 
         public function DBGetRAM($Budget, $Typeofmemory, $Memoryslots)
         {
             $QueryConditions = array("componentdetail.DetailTitle = 'Type of memory' AND componentdetail.DetailValue = '$Typeofmemory'", "componentdetail.DetailTitle = 'Number of modules' AND componentdetail.DetailValueNumeric <= $Memoryslots");
-            $rows = $this->GetItem("memory", $Budget, $QueryConditions, "ORDER BY (componentdetail.DetailTitle = 'MemoryCapacity'), componentdetail.DetailValueNumeric DESC");
+            $rows = $this->GetItem("memory", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Memory Capacity' ORDER BY componentdetail.DetailValueNumeric DESC");
             return $rows;
         }
 
         public function DBGetPSU($Budget)
         {
             $QueryConditions = array("");
-            $rows = $this->GetItem("psu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompPrice DESC ");
+            $rows = $this->GetItem("psu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompPrice DESC");
             return $rows;
         }
 
