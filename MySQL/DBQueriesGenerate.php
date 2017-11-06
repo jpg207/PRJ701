@@ -91,7 +91,14 @@
             return $rows;
         }
 
-        public function DBGetMOBO($Budget, $supportedMOBOFormats, $WIFI)
+        public function DBGetCPU($Budget)
+        {
+            $QueryConditions = array();
+            $rows = $this->GetItem("cpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC");
+            return $rows;
+        }
+
+        public function DBGetMOBO($Budget, $supportedMOBOFormats, $Socket, $WIFI)
         {
             #print_r($supportedMOBOFormats);
             $collection = array();
@@ -105,7 +112,7 @@
                 }
             }
             $MOBOFormatsQuery = $MOBOFormatsQuery . ")";
-            $QueryConditions = array($MOBOFormatsQuery);
+            $QueryConditions = array($MOBOFormatsQuery , "componentdetail.DetailTitle = 'Socket' AND componentdetail.DetailValue = '$Socket'");
             $rows = $this->GetItem("motherboard", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompPrice DESC");
             array_push($collection, $rows);
             if ($WIFI == "Yes" && $rows['ComponentDetail']['Wireless network']['DetailValue'] != "Yes") {
@@ -115,13 +122,6 @@
                 array_push($collection, $wireless);
             }
             return $collection;
-        }
-
-        public function DBGetCPU($Budget, $Socket)
-        {
-            $QueryConditions = array("componentdetail.DetailTitle = 'Socket' AND componentdetail.DetailValue = '$Socket'");
-            $rows = $this->GetItem("cpu", $Budget, $QueryConditions, "ORDER BY componentidentifyer.CompRating ASC");
-            return $rows;
         }
 
         public function DBGetGPU($Budget, $Length)
@@ -148,7 +148,7 @@
         public function DBGetRAM($Budget, $Typeofmemory, $Memoryslots)
         {
             $QueryConditions = array("componentdetail.DetailTitle = 'Type of memory' AND componentdetail.DetailValue = '$Typeofmemory'", "componentdetail.DetailTitle = 'Number of modules' AND componentdetail.DetailValueNumeric <= $Memoryslots");
-            $rows = $this->GetItem("memory", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Memory Capacity' ORDER BY componentdetail.DetailValueNumeric DESC");
+            $rows = $this->GetItem("memory", $Budget, $QueryConditions, "AND componentdetail.DetailTitle = 'Memory Capacity' ORDER BY componentdetail.DetailValueNumeric DESC, componentidentifyer.CompPrice ASC");
             return $rows;
         }
 
