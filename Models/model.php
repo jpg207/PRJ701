@@ -50,9 +50,9 @@
             $budget = $Choices['Budget'];//Gets user budget
             //Weighting system, Based on users usage type this system determines how much of the budget will be spent on each component
             if ($Choices['UserType'] == "Gamer") {
-                $ComponentBudget = array('Case' => ((7 / 100) * $budget), 'MotherBoard' => ((10 / 100) * $budget), 'CPU' => ((20 / 100) * $budget), 'GPU' => ((30 / 100) * $budget), 'HDD' => ((0 / 100) * $budget), 'SSD' => ((0 / 100) * $budget), 'RAM' => ((10 / 100) * $budget), 'Storage' => ((13 / 100) * $budget), 'PSU' => ((7 / 100) * $budget), 'CPUCooler' => ((3/100) * $budget));
+                $ComponentBudget = array('Case' => ((7 / 100) * $budget), 'MotherBoard' => ((10 / 100) * $budget), 'CPU' => ((20 / 100) * $budget), 'GPU' => ((33 / 100) * $budget), 'HDD' => ((0 / 100) * $budget), 'SSD' => ((0 / 100) * $budget), 'RAM' => ((7 / 100) * $budget), 'Storage' => ((13 / 100) * $budget), 'PSU' => ((8 / 100) * $budget), 'CPUCooler' => ((3/100) * $budget));
             }elseif ($Choices['UserType'] == "Home/School/Business") {
-                $ComponentBudget = array('Case' => ((10 / 100) * $budget), 'MotherBoard' => ((15 / 100) * $budget), 'CPU' => ((30 / 100) * $budget), 'GPU' => ((10 / 100) * $budget), 'HDD' => ((0 / 100) * $budget), 'SSD' => ((0 / 100) * $budget), 'RAM' => ((7 / 100) * $budget), 'Storage' => ((10 / 100) * $budget), 'PSU' => ((5 / 100) * $budget), 'CPUCooler' => ((3/100) * $budget));
+                $ComponentBudget = array('Case' => ((10 / 100) * $budget), 'MotherBoard' => ((12 / 100) * $budget), 'CPU' => ((23 / 100) * $budget), 'GPU' => ((10 / 100) * $budget), 'HDD' => ((0 / 100) * $budget), 'SSD' => ((0 / 100) * $budget), 'RAM' => ((7 / 100) * $budget), 'Storage' => ((20 / 100) * $budget), 'PSU' => ((5 / 100) * $budget), 'CPUCooler' => ((3/100) * $budget));
             }else {
                 $ComponentBudget = array('Case' => ((5 / 100) * $budget), 'MotherBoard' => ((10 / 100) * $budget), 'CPU' => ((30 / 100) * $budget), 'GPU' => ((20 / 100) * $budget), 'HDD' => ((0 / 100) * $budget), 'SSD' => ((0 / 100) * $budget), 'RAM' => ((10 / 100) * $budget), 'Storage' => ((15 / 100) * $budget), 'PSU' => ((7 / 100) * $budget), 'CPUCooler' => ((3/100) * $budget));
             }
@@ -75,22 +75,21 @@
                 $Build['Case'] = $DBQueriesGenerate->DBGetCase($ComponentBudget['Case'], $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
 
                 if (isset($Build['Case']['CompName']) && $Build['Case']['CompName'] != "") {
-                    $supportedMOBOFormats = explode(',', $Build['Case']['ComponentDetail']['Supported motherboards']['DetailValue']);//Explodes the string of supported motherboard formats of the case by "," into an array
-                    $collection = $DBQueriesGenerate->DBGetMOBO($ComponentBudget['MotherBoard'], $supportedMOBOFormats, $Choices['WiFi']);//Gets a CPU based on the budget, CPU Socket and Supported motherboard formats of the case and stores it as part of the current build
-                    $Build['MotherBoard'] = $collection[0];
-                    if (isset($collection[1])) {
-                        $Build['WirelessAdapter'] = $collection[1];
-                        $ComponentBudget['WirelessAdapter'] = ((20/100) * $ComponentBudget['MotherBoard']);
-                    }
+                    while (!isset($Build['CPU']) && !isset($Build['MotherBoard'])) {
+                        unset($Build['CPU']);
+                        unset($Build['MotherBoard']);
+                        $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU']);
 
+                        $supportedMOBOFormats = explode(',', $Build['Case']['ComponentDetail']['Supported motherboards']['DetailValue']);
+                        $collection = $DBQueriesGenerate->DBGetMOBO($ComponentBudget['MotherBoard'], $supportedMOBOFormats, $Build['CPU']['ComponentDetail']['Socket']['DetailValue'], $Choices['WiFi']);
+                        $Build['MotherBoard'] = $collection[0];
+                        if (isset($collection[1])) {
+                            $Build['WirelessAdapter'] = $collection[1];
+                            $ComponentBudget['WirelessAdapter'] = ((20/100) * $ComponentBudget['MotherBoard']);
+                        }
+                    }
                 }else {
                     throw new Exception ("Could not find a case that fit your budget and formfactor, midi towers tend to have the best mix of compatibility and price");
-                }
-
-                if (isset($Build['MotherBoard']['CompName']) && $Build['MotherBoard']['CompName'] != "") {
-                    $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU'], $Build['MotherBoard']['ComponentDetail']['Socket']['DetailValue']); //Gets a CPU based on the budget and stores it as part of the current build
-                }else {
-                    throw new Exception("Could not find a motherboard that fit your requirements");
                 }
 
                 $Build['GPU'] = $DBQueriesGenerate->DBGetGPU($ComponentBudget['GPU'], $Build['Case']['ComponentDetail']['Maximum length of video card']['DetailValueNumeric']);//Gets a GPU based on the budget and stores it as part of the current build
