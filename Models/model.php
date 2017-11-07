@@ -75,19 +75,26 @@
                 $Build['Case'] = $DBQueriesGenerate->DBGetCase($ComponentBudget['Case'], $Choices['FormFactor']);//Gets a Case based on the budget and stores it  as part of the current build
 
                 if (isset($Build['Case']['CompName']) && $Build['Case']['CompName'] != "") {
-                    while (!isset($Build['CPU']) && !isset($Build['MotherBoard'])) {
+                    $InvalidCPUs = array();
+                    $supportedMOBOFormats = explode(',', $Build['Case']['ComponentDetail']['Supported motherboards']['DetailValue']);
+                    do {
                         unset($Build['CPU']);
                         unset($Build['MotherBoard']);
-                        $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU']);
+                        $Build['CPU'] = $DBQueriesGenerate->DBGetCPU($ComponentBudget['CPU'], $InvalidCPUs);
 
-                        $supportedMOBOFormats = explode(',', $Build['Case']['ComponentDetail']['Supported motherboards']['DetailValue']);
                         $collection = $DBQueriesGenerate->DBGetMOBO($ComponentBudget['MotherBoard'], $supportedMOBOFormats, $Build['CPU']['ComponentDetail']['Socket']['DetailValue'], $Choices['WiFi']);
-                        $Build['MotherBoard'] = $collection[0];
-                        if (isset($collection[1])) {
-                            $Build['WirelessAdapter'] = $collection[1];
-                            $ComponentBudget['WirelessAdapter'] = ((20/100) * $ComponentBudget['MotherBoard']);
+                        if (isset($collection[0])) {
+                            $Build['MotherBoard'] = $collection[0];
+                            if (isset($collection[1])) {
+                                $Build['WirelessAdapter'] = $collection[1];
+                                $ComponentBudget['WirelessAdapter'] = ((20/100) * $ComponentBudget['MotherBoard']);
+                            }
+                        }else{
+                            array_push($InvalidSockets, $Build['CPU']['CompID']['ComponentDetail']['Socket']['DetailValueNumeric']);
+                            unset($Build['CPU']);
+                            unset($Build['MotherBoard']);
                         }
-                    }
+                    }while (!isset($Build['CPU']) && !isset($Build['MotherBoard']));
                 }else {
                     throw new Exception ("Could not find a case that fit your budget and formfactor, midi towers tend to have the best mix of compatibility and price");
                 }

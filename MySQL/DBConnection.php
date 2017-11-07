@@ -35,5 +35,9 @@
         {
             $this->connectDb($pStrDatabase);
         }
+
+        public function closeConnection(){
+            mysqli_close($this->connectRs);
+        }
     }
 ?>
